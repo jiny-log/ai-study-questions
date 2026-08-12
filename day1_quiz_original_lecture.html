@@ -1,0 +1,81 @@
+<div style="padding:1rem 0">
+<h2 class="sr-only">Day1 강의 원본 내용 객관식 퀴즈, 선택하면 바로 채점됩니다</h2>
+<div id="progress" style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;"></div>
+<div style="height:4px;background:var(--surface-1);border-radius:4px;margin-bottom:1.25rem;overflow:hidden;">
+  <div id="bar" style="height:100%;background:var(--fill-accent, #378ADD);width:0%;transition:width .2s;"></div>
+</div>
+<div id="qbox"></div>
+<div id="result" style="display:none;text-align:center;padding:2rem 0;"></div>
+</div>
+<script>
+const Q = [
+{q:"학습(Learning)이 성립하려면 반드시 필요한 3가지는?", opts:["모델, 서버, GPU","데이터, 가설공간, 손실함수","라벨, 피처, 정확도","훈련셋, 검증셋, 테스트셋"], a:1, e:"학습에는 데이터(공부할 예시), 가설공간(고를 수 있는 후보 함수들), 손실함수(어떤 함수가 더 좋은지 판단하는 기준) 3가지가 필요합니다."},
+{q:"가설공간(Hypothesis Space)이란 무엇인가요?", opts:["훈련 데이터 전체의 집합","Feature와 Label의 관계를 표현할 수 있는 모든 후보 함수의 집합","모델의 하이퍼파라미터 조합","손실함수의 최솟값"], a:1, e:"가설공간은 Feature와 Label 관계를 표현하는 모든 후보 함수들의 집합이고, 그중 실제로 골라낸 함수 하나가 모델입니다."},
+{q:"학습의 5단계 과정 중 올바른 순서는?", opts:["예측 → 함수 선택 → 점수화 → 수정 → 반복","함수 선택 → 예측 → 손실 계산 → 함수 수정 → 반복","손실 계산 → 함수 선택 → 예측 → 반복 → 수정","함수 수정 → 예측 → 함수 선택 → 손실 계산 → 반복"], a:1, e:"가설공간에서 함수를 고르고 → 데이터로 예측하고 → 손실함수로 점수를 매기고 → 덜 틀리는 쪽으로 함수를 고치고 → 반복합니다."},
+{q:"지도학습(Supervised Learning)을 가장 정확히 정의한 것은?", opts:["라벨 없는 데이터에서 구조를 찾는 학습","정답이 짝지어진 데이터로 학습해 새로운 데이터도 잘 맞히는 학습","데이터 없이 규칙만으로 판단하는 학습","군집을 나누는 학습"], a:1, e:"지도학습은 Feature와 Label이 짝지어진 훈련 데이터로 규칙을 배운 뒤, 본 적 없는 새 데이터에서도 정답을 잘 맞히는 게 목표입니다."},
+{q:"교차 엔트로피(Cross Entropy)가 정확도·정밀도·재현율과 근본적으로 다른 이유는?", opts:["계산이 더 빠르기 때문","결과가 맞았는지가 아니라 학습 중 모델을 어느 방향으로 고칠지 알려주는 손실함수이기 때문","분류에만 쓰이고 회귀에는 못 쓰기 때문","항상 0~1 사이 값이기 때문"], a:1, e:"정확도 등은 결과 평가지표이고, 교차 엔트로피는 학습 과정에서 모델을 어느 방향으로 조정할지 알려주는 손실함수입니다."},
+{q:"오버피팅(과적합)에 대한 설명으로 옳은 것은?", opts:["데이터 분포 자체가 훈련 때와 다르게 바뀌는 현상이다","같은 분포 안에서 모델이 표본의 우연한 잡음까지 과하게 외워버리는 현상이다","훈련·테스트 모두 성능이 나쁜 현상이다","모델이 너무 단순해서 생기는 현상이다"], a:1, e:"오버피팅은 분포 변화와는 다른 개념으로, 같은 분포 안에서 모델이 표본 하나하나의 잡음까지 과하게 학습해 생기는 문제입니다."},
+{q:"검증셋(Hold-out) 방식의 한계로 옳은 것은?", opts:["연산량이 K-fold보다 훨씬 많다","어떤 표본이 훈련/검증에 들어가느냐에 따라 추정치가 가변적이고, 테스트 오류를 과대추정하는 경향이 있다","항상 K-means보다 느리다","라벨이 없는 데이터에만 쓸 수 있다"], a:1, e:"Hold-out은 분할에 따라 추정치가 매번 달라지고, 훈련셋 일부만 써서 학습하므로 테스트 오류가 과대추정되는 경향이 있습니다."},
+{q:"LOOCV(Leave-One-Out CV)에 대한 설명으로 옳은 것은?", opts:["K=2일 때를 말한다","K가 전체 데이터 개수 n과 같아서 매번 1개만 검증셋으로 빼는 방식이다","검증셋을 아예 쓰지 않는 방식이다","연산량이 가장 적다"], a:1, e:"LOOCV는 K=n인 극단적 경우로, 데이터 1개만 검증셋으로 빼고 나머지 n-1개로 학습하는 과정을 n번 반복해 연산량이 많습니다."},
+{q:"지도학습과 비지도학습의 핵심 차이는?", opts:["지도학습은 항상 더 정확하다","지도학습은 입력+정답으로 예측 모델을 학습하고, 비지도학습은 입력만으로 데이터의 구조·표현을 학습한다","비지도학습은 회귀에만 쓰인다","지도학습에는 손실함수가 없다"], a:1, e:"지도학습의 출력은 정답 예측이고, 비지도학습의 출력은 데이터의 구조·요약·표현이라는 점이 핵심 차이입니다."},
+{q:"계층적 군집에서 두 클러스터 간 거리를 최댓값으로 정의하는 링크 방식은?", opts:["Single 링크","Complete 링크","Average 링크","Centroid 링크"], a:1, e:"Complete(최대 거리) 링크는 두 클러스터 내 데이터 쌍별 거리 중 최댓값을 군집 간 거리로 사용합니다."},
+{q:"클러스터링 전 스케일링(표준화)이 필요한 이유는?", opts:["계산 속도를 높이기 위해서","변수마다 단위가 다르면 단위가 큰 변수에만 거리 계산이 좌우되기 때문에","라벨을 만들기 위해서","K값을 자동으로 정하기 위해서","이상치를 제거하기 위해서"], a:1, e:"나이 vs 연봉처럼 단위가 다르면 단위가 큰 변수가 거리 계산을 지배하므로, 평균 0·표준편차 1로 맞춰 공정하게 거리를 재야 합니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'" style="display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;font-size:14px;line-height:1.5;">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p style="font-size:15px;font-weight:500;margin:0 0 1rem;">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb" style="display:none;margin-top:12px;padding:12px 14px;border-radius:var(--radius);font-size:13px;line-height:1.6;"></div>'+
+    '<button id="next" style="display:none;margin-top:12px;width:100%;">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--border-success, #639922)'; b.style.background='var(--bg-success, #EAF3DE)'; b.style.color='var(--text-success, #27500A)'; }
+        else if(i===chosen){ b.style.borderColor='var(--border-danger, #E24B4A)'; b.style.background='var(--bg-danger, #FCEBEB)'; b.style.color='var(--text-danger, #791F1F)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--bg-success, #EAF3DE)' : 'var(--bg-danger, #FCEBEB)';
+      fb.style.color = correct ? 'var(--text-success, #27500A)' : 'var(--text-danger, #791F1F)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p style="font-size:24px;font-weight:500;margin:0 0 4px;">'+score+' / '+Q.length+'</p>'+
+    '<p style="font-size:14px;color:var(--text-secondary);margin:0 0 1.5rem;">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0; resultBox.style.display='none'; qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
