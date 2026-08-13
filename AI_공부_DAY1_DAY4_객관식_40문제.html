@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 공부 DAY1–DAY4 객관식 40문제</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--sub:#667085;--line:#e4e7ec;--blue:#465fff;--good:#07883f;--bad:#d92d20}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Noto Sans KR",sans-serif}.wrap{max-width:920px;margin:auto;padding:28px 18px 70px}header{background:linear-gradient(135deg,#263b80,#6d5dfc);color:#fff;padding:32px;border-radius:22px;box-shadow:0 12px 30px #253b8030}h1{margin:0 0 8px;font-size:clamp(25px,5vw,40px)}header p{margin:0;opacity:.88}.toolbar{position:sticky;top:0;z-index:5;margin:18px 0;padding:14px;background:#f5f7fbeF;backdrop-filter:blur(10px);border-radius:15px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar button,.action{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 14px;border-radius:999px;font-weight:700;cursor:pointer}.toolbar button.active,.action.primary{background:var(--blue);color:#fff;border-color:var(--blue)}#status{margin-left:auto;font-weight:800}.q{background:var(--card);border:1px solid var(--line);padding:22px;margin:14px 0;border-radius:18px;box-shadow:0 4px 14px #1018280a}.q.correct{border-color:#75d59c}.q.wrong{border-color:#f19991}.meta{display:flex;gap:8px;align-items:center;color:var(--sub);font-size:13px;font-weight:800}.tag{color:var(--blue);background:#eef0ff;padding:2px 9px;border-radius:999px}.q h2{font-size:18px;margin:10px 0 14px}.option{display:block;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;cursor:pointer}.option:hover{background:#f8f9ff}.option:has(input:checked){border-color:var(--blue);background:#f0f2ff}.option input{margin-right:9px}.explain{display:none;margin-top:14px;padding:12px 14px;border-radius:11px;background:#f7f8fa}.graded .explain{display:block}.answer{font-weight:900}.correct .answer{color:var(--good)}.wrong .answer{color:var(--bad)}.bottom{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}.result{display:none;background:#101828;color:#fff;border-radius:18px;padding:22px;margin-top:18px;text-align:center;font-size:20px;font-weight:800}.result.show{display:block}@media(max-width:600px){header{padding:24px}.q{padding:18px}#status{width:100%;margin:4px 0 0}}
+</style>
+</head><body><main class="wrap"><header><h1>AI 공부 기출형 40제</h1><p>DAY1–DAY4 핵심 개념 · 4지선다 · DAY별 10문제</p></header><nav class="toolbar" id="filters"><button class="active" data-day="all">전체</button><button data-day="1">DAY 1</button><button data-day="2">DAY 2</button><button data-day="3">DAY 3</button><button data-day="4">DAY 4</button><button id="wrongOnly">오답만</button><span id="status">0 / 40 선택</span></nav><section id="quiz"></section><div class="bottom"><button class="action primary" id="grade">채점하기</button><button class="action" id="reset">처음부터</button></div><div class="result" id="result"></div></main>
+<script>
+const Q=[
+[1,"AI, ML, DL의 포함 관계로 옳은 것은?",["DL ⊃ ML ⊃ AI","AI ⊃ ML ⊃ DL","ML ⊃ AI ⊃ DL","세 개념은 서로 독립적이다"],1,"AI가 가장 큰 개념이고, ML은 AI의 일부, DL은 신경망을 사용하는 ML의 하위 분야다."],
+[1,"모델이 예측에 참고하는 입력 정보와 모델이 맞혀야 하는 정답을 순서대로 부른 것은?",["Label, Feature","Feature, Label","Model, Loss","Loss, Feature"],1,"Feature는 입력 정보, Label은 예측하려는 정답이다."],
+[1,"분류 문제에서 주로 사용하는 손실함수는?",["Cross Entropy","R²","MAE","표준편차"],0,"회귀에는 MSE, 분류에는 Cross Entropy가 대표적으로 사용된다."],
+[1,"불균형 분류 데이터에서 정확도만 볼 때 생길 수 있는 문제는?",["학습률이 자동 증가한다","소수 클래스를 못 맞혀도 성능이 높아 보일 수 있다","특성 수가 줄어든다","회귀 문제로 자동 변환된다"],1,"다수 클래스만 예측해도 높은 정확도가 나올 수 있어 Precision, Recall, F1 등을 함께 봐야 한다."],
+[1,"R²에 대한 설명으로 옳은 것은?",["항상 0 이상이다","원래 데이터와 같은 단위다","평균 예측보다 못하면 음수가 될 수 있다","클수록 오차가 크다"],2,"검증·테스트에서 모델이 평균값 예측보다 못하면 R²는 음수가 될 수 있다."],
+[1,"과적합의 전형적인 상태는?",["훈련과 테스트 성능이 모두 낮다","훈련 성능은 높고 테스트 성능은 낮다","훈련 성능만 측정할 수 없다","모델이 학습하지 않는다"],1,"과적합은 훈련 데이터를 지나치게 외워 새 데이터에 대한 일반화가 나빠진 상태다."],
+[1,"K-겹 교차검증의 장점은?",["테스트 데이터를 학습에 반드시 포함한다","한 번의 홀드아웃보다 성능 추정이 안정적이다","결측치를 자동 제거한다","항상 학습 시간이 줄어든다"],1,"여러 분할에서 검증하고 평균을 내므로 단일 홀드아웃보다 추정 변동이 작다."],
+[1,"데이터 누수를 막는 올바른 표준화 방법은?",["전체 데이터로 scaler를 fit한다","test로 fit하고 train을 변환한다","train으로 fit하고 같은 변환을 test에 적용한다","train과 test 각각 따로 fit한다"],2,"평균·표준편차 같은 통계량은 train에서만 계산한 뒤 test에 그대로 적용해야 한다."],
+[1,"K-means와 계층적 군집의 차이로 옳은 것은?",["둘 다 라벨이 필요하다","K-means는 군집 수 K를 미리 정한다","계층적 군집은 항상 K=2다","K-means는 지도학습이다"],1,"K-means는 K를 사전에 지정하며, 계층적 군집은 덴드로그램을 통해 구조를 살필 수 있다."],
+[1,"scikit-learn 분석의 올바른 순서는?",["모델 학습→분할→전처리→평가","분할→train 기준 전처리→학습→평가","전처리→전체 데이터 학습→분할","평가→학습→분할"],1,"먼저 train/test를 분할하고, 전처리의 fit은 train에만 수행한 후 모델을 학습·평가한다."],
+[2,"선형회귀에서 최소제곱법이 최소화하는 것은?",["잔차제곱합(RSS)","정확도","은닉층 수","분류 임계값"],0,"최소제곱법은 실제값과 예측값의 차이인 잔차의 제곱합을 최소화한다."],
+[2,"입력 변수끼리 강한 상관관계가 있어 회귀계수 해석이 불안정해지는 현상은?",["과소표집","다중공선성","기울기 폭발","토큰화"],1,"다중공선성은 독립변수들이 서로 강하게 관련될 때 계수 추정이 불안정해지는 문제다."],
+[2,"상관관계와 인과관계에 대한 설명으로 옳은 것은?",["상관이 높으면 반드시 인과다","인과가 없어도 제3의 변수로 상관이 나타날 수 있다","둘은 항상 같은 의미다","상관은 회귀에서 사용할 수 없다"],1,"상관관계만으로 원인과 결과를 단정할 수 없다."],
+[2,"로지스틱 회귀에서 선형 결합값을 0~1 확률로 바꾸는 함수는?",["ReLU","Softmax만 가능","Sigmoid","MSE"],2,"시그모이드 함수는 임의의 실수를 0과 1 사이 값으로 변환한다."],
+[2,"로지스틱 회귀 계수를 추정하는 대표 방법은?",["최대우도추정(MLE)","K-means","PCA","빔서치"],0,"관측 데이터가 나타날 우도를 최대화하는 계수를 찾는 MLE를 사용한다."],
+[2,"Shallow network와 Deep network의 구분 기준은?",["데이터 개수","은닉층의 개수","출력 클래스 이름","학습률의 부호"],1,"은닉층 1개는 보통 Shallow, 여러 은닉층을 합성한 구조는 Deep network로 본다."],
+[2,"경사하강법의 파라미터 업데이트 방향은?",["손실 기울기와 같은 방향","손실 기울기의 반대 방향","무조건 0 방향","출력층에서만 임의 방향"],1,"손실을 줄이기 위해 기울기의 반대 방향으로 파라미터를 이동한다."],
+[2,"학습률이 지나치게 큰 경우 발생하기 쉬운 현상은?",["최솟값을 지나쳐 발산하거나 진동한다","항상 정확히 수렴한다","데이터가 자동 증강된다","은닉층이 삭제된다"],0,"업데이트 폭이 너무 크면 최솟값을 넘나들며 불안정해질 수 있다."],
+[2,"SGD의 특징으로 가장 적절한 것은?",["항상 전체 데이터를 한 번에 사용한다","미니배치로 기울기를 근사해 계산량을 줄일 수 있다","기울기를 계산하지 않는다","항상 배치 경사하강법보다 빠르게 수렴한다"],1,"SGD는 일부 데이터로 기울기를 계산하며 노이즈가 지역 최솟값 탈출에 도움을 줄 수 있지만 항상 더 빠른 것은 아니다."],
+[2,"역전파의 핵심 원리는?",["베이즈 정리","연쇄법칙으로 출력에서 입력 방향으로 기울기를 전달","군집 중심 재계산","원-핫 인코딩"],1,"역전파는 연쇄법칙을 반복 적용해 각 층 파라미터의 기울기를 구한다."],
+[3,"원-핫 인코딩의 대표적 한계는?",["단어 간 의미 유사성을 표현하기 어렵다","항상 차원이 1이다","순서 정보를 완벽히 보존한다","학습 없이 의미를 자동 생성한다"],0,"원-핫 벡터는 고차원·희소하며 단어 사이 의미 관계가 드러나지 않는다."],
+[3,"Word2Vec에서 중심 단어로 주변 단어를 예측하는 방식은?",["CBOW","Skip-gram","BPE","Beam Search"],1,"Skip-gram은 중심 단어로 주변 단어를, CBOW는 주변 단어로 중심 단어를 예측한다."],
+[3,"RNN이 순차 데이터의 문맥을 이어가는 핵심 요소는?",["Hidden state","군집 중심","결정계수","Top-K"],0,"RNN은 이전 시점의 hidden state를 다음 시점 계산에 전달한다."],
+[3,"기본 RNN이 긴 문장에서 먼 과거 정보를 잊기 쉬운 주요 원인은?",["다중공선성","기울기 소실","데이터 누수","과도한 원-핫 차원 축소"],1,"긴 역전파 과정에서 기울기가 작아지는 기울기 소실로 장기 의존성 학습이 어렵다."],
+[3,"LSTM이 장기 의존성을 보완하는 핵심 구조는?",["Cell state와 게이트","K개의 군집 중심","RSS와 R²","Top-P와 Temperature"],0,"cell state와 입력·망각·출력 게이트가 정보의 보존과 제거를 조절한다."],
+[3,"기본 Seq2Seq의 병목현상은 무엇인가?",["모든 입력 정보를 하나의 고정 길이 벡터에 압축한다","출력 길이가 항상 1이다","라벨이 반드시 없다","어텐션을 너무 많이 사용한다"],0,"긴 입력 전체를 하나의 문맥 벡터에 담으면 정보 손실이 커진다."],
+[3,"Attention이 Seq2Seq 병목을 완화하는 방식은?",["디코더가 인코더의 모든 시점 표현을 가중 참조한다","입력을 무조건 삭제한다","은닉층을 1개로 제한한다","단어를 정수 하나로만 바꾼다"],0,"각 출력 시점마다 관련성이 높은 인코더 상태를 선택적으로 참조한다."],
+[3,"Transformer에서 순서 정보를 더하는 장치는?",["Positional Encoding","Confusion Matrix","StandardScaler","PPO"],0,"Self-Attention 자체에는 순서 개념이 없으므로 위치 인코딩을 더한다."],
+[3,"디코더가 학습 중 미래 토큰을 미리 보지 못하게 하는 장치는?",["Causal Masking","MinMax Scaling","Cross Validation","Drop Label"],0,"Causal mask는 현재 위치 이후의 토큰에 대한 attention을 차단한다."],
+[3,"BERT, T5, GPT의 구조 연결로 옳은 것은?",["BERT-Decoder, T5-Encoder, GPT-Encoder-Decoder","BERT-Encoder, T5-Encoder-Decoder, GPT-Decoder","셋 모두 Encoder만 사용","셋 모두 Decoder만 사용"],1,"BERT는 Encoder 중심, T5는 Encoder-Decoder, GPT는 Decoder 중심 모델이다."],
+[4,"파운데이션 모델의 핵심 3요소로 가장 적절한 것은?",["빅데이터·자기지도학습·Transformer","소량 데이터·수동 규칙·K-means","라벨링·선형회귀·PCA","SQL·HTML·CSS"],0,"대규모 데이터, 자기지도학습, Attention 기반 Transformer가 핵심 기반이다."],
+[4,"Scaling Law가 설명하는 관계는?",["규모가 커질수록 성능이 항상 무작위가 된다","컴퓨트·데이터·파라미터 규모와 성능 사이의 규칙적 관계","프롬프트 길이만 성능을 결정한다","모델 크기와 성능은 무관하다"],1,"컴퓨트, 데이터량, 파라미터 수가 커질수록 손실·성능이 일정한 법칙을 따라 개선되는 경향을 말한다."],
+[4,"일정 규모를 넘었을 때 이전에는 뚜렷하지 않던 능력이 나타나는 현상은?",["정규화","창발성","결측치","다중공선성"],1,"In-Context Learning이나 추론 능력처럼 규모 임계점 이후 나타나는 능력을 창발적 능력이라 한다."],
+[4,"InstructGPT식 학습 순서로 옳은 것은?",["PPO→SFT→보상모델","SFT→선호 순위로 보상모델 학습→PPO","K-means→PCA→SFT","RAG→토큰화→회귀"],1,"시범 답변으로 SFT한 뒤 사람의 선호 순위로 보상 모델을 만들고 PPO로 정책을 조정한다."],
+[4,"Greedy decoding의 특징은?",["매 단계 확률이 가장 높은 토큰 하나를 선택한다","확률 상위 K개를 모두 문장 끝까지 유지한다","누적확률 P를 넘는 집합에서만 샘플링한다","항상 가장 다양한 문장을 만든다"],0,"Greedy는 각 단계의 국소 최댓값을 선택해 빠르지만 전체 문장 최적을 보장하지 않는다."],
+[4,"Top-P(Nucleus) sampling의 설명으로 옳은 것은?",["항상 정확히 K개 후보만 쓴다","누적 확률이 P 이상이 되는 최소 후보 집합에서 샘플링한다","가장 높은 토큰만 고른다","모든 토큰 확률을 같게 만든다"],1,"Top-P는 분포에 따라 후보 집합 크기가 동적으로 달라진다."],
+[4,"Few-shot prompting의 핵심은?",["모델 파라미터를 반드시 업데이트한다","프롬프트에 소수의 입출력 예시를 제공한다","정답을 숨긴다","검색 데이터베이스를 만든다"],1,"예시를 통해 작업 방식과 출력 형식을 모델에 보여준다."],
+[4,"LLM-as-judge에서 주의해야 할 대표 편향 조합은?",["위치·길이·자기선호 편향","색상·해상도·파일명 편향","평균·분산·중앙값 편향","학습·검증·테스트 편향"],0,"답변의 제시 순서, 길이, 자기 모델 계열 선호가 평가를 왜곡할 수 있다."],
+[4,"환각(Hallucination)을 완화하는 대표 방법은?",["RAG로 외부 근거를 검색해 답변에 제공","Temperature를 무조건 최대로 설정","라벨을 모두 삭제","항상 Greedy만 사용"],0,"RAG는 관련 외부 자료를 검색해 모델의 답변 근거로 제공함으로써 환각을 줄일 수 있다."],
+[4,"JSON Schema를 response_format으로 강제하는 주된 이유는?",["모델 파라미터 수를 줄이기 위해","출력 필드와 형식을 안정적으로 보장해 파싱 오류를 줄이기 위해","검색 속도를 높이기 위해","프롬프트를 이미지로 바꾸기 위해"],1,"엄격한 스키마는 필요한 필드만 정해진 타입으로 반환하게 해 후속 파싱을 안정화한다."]];
+const quiz=document.querySelector('#quiz'),status=document.querySelector('#status'),result=document.querySelector('#result');let graded=false,day='all',wrong=false;
+function draw(){quiz.innerHTML='';Q.forEach((q,i)=>{const saved=localStorage.getItem('ai40_'+i);const el=document.createElement('article');el.className='q';el.dataset.day=q[0];el.dataset.i=i;el.innerHTML=`<div class="meta"><span class="tag">DAY ${q[0]}</span><span>${i+1}번</span></div><h2>${q[1]}</h2>${q[2].map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}" ${saved==j?'checked':''}>${j+1}. ${o}</label>`).join('')}<div class="explain"><div class="answer">정답: ${q[3]+1}번</div>${q[4]}</div>`;quiz.append(el)});if(graded)mark();filter();count()}
+function count(){const n=Q.filter((_,i)=>localStorage.getItem('ai40_'+i)!==null).length;status.textContent=`${n} / 40 선택`}
+function mark(){let score=0;document.querySelectorAll('.q').forEach(el=>{const i=+el.dataset.i,v=localStorage.getItem('ai40_'+i);el.classList.add('graded');el.classList.remove('correct','wrong');if(v!==null&&+v===Q[i][3]){el.classList.add('correct');score++}else el.classList.add('wrong')});result.classList.add('show');result.textContent=`총점 ${score} / 40점 · 정답률 ${Math.round(score/40*100)}%`;localStorage.setItem('ai40_score',score)}
+function filter(){document.querySelectorAll('.q').forEach(el=>{const d=day==='all'||el.dataset.day===day;const w=!wrong||el.classList.contains('wrong');el.hidden=!(d&&w)})}
+quiz.addEventListener('change',e=>{if(e.target.matches('input')){localStorage.setItem('ai40_'+e.target.name.slice(1),e.target.value);count()}});document.querySelector('#filters').addEventListener('click',e=>{if(e.target.dataset.day){day=e.target.dataset.day;document.querySelectorAll('[data-day]').forEach(b=>b.classList.toggle('active',b===e.target));filter()}});document.querySelector('#wrongOnly').onclick=e=>{wrong=!wrong;e.target.classList.toggle('active',wrong);filter()};document.querySelector('#grade').onclick=()=>{graded=true;mark();scrollTo({top:document.body.scrollHeight,behavior:'smooth'})};document.querySelector('#reset').onclick=()=>{if(confirm('선택과 점수를 모두 초기화할까요?')){Object.keys(localStorage).filter(k=>k.startsWith('ai40_')).forEach(k=>localStorage.removeItem(k));graded=false;result.classList.remove('show');draw()}};draw();
+</script></body></html>
