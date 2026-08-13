@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day3 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day3 학습 점검 문제</h1>
+<p class="subtitle">토큰화·임베딩·Seq2Seq·Attention·GPT-2 실습/과제 기반 점검 문제 — 10문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [
+{q:"서브워드(subword) 토큰화가 단어 단위 토큰화보다 나은 점으로 가장 적절한 것은?", opts:["항상 더 빠르게 동작한다", "학습되지 않은 단어(OOV)도 알고 있는 조각으로 나눠 처리할 수 있다", "vocab 크기가 항상 더 작아진다", "문법 오류를 자동으로 교정한다"], a:1, e:"SSAFY처럼 학습 데이터에 없던 단어도 SS, ##AF, ##Y 같은 조각으로 쪼개 표현할 수 있어, 완전히 모르는 [UNK] 토큰으로 처리되는 것을 줄여줍니다."},
+{q:"BPE(Byte Pair Encoding) 알고리즘의 핵심 동작 방식으로 옳은 것은?", opts:["무작위로 글자를 묶는다", "가장 자주 등장하는 인접한 두 토큰(쌍)을 찾아 하나로 병합하는 과정을 반복한다", "모든 단어를 통째로 하나의 토큰으로 취급한다", "문장 부호만 따로 분리한다"], a:1, e:"get_stats로 인접 토큰 쌍의 빈도를 세고, merge_vocab으로 가장 빈번한 쌍을 새 토큰으로 합치는 과정을 원하는 vocab 크기가 될 때까지 반복하는 것이 BPE입니다."},
+{q:"nn.Embedding(num_embeddings=30000, embedding_dim=768)에서 각 숫자가 의미하는 것은?", opts:["num_embeddings는 벡터 차원, embedding_dim은 단어 수", "num_embeddings는 vocab에 있는 고유 토큰 수, embedding_dim은 각 토큰을 표현할 벡터의 차원", "둘 다 학습률을 의미한다", "둘 다 배치 크기를 의미한다"], a:1, e:"num_embeddings는 인덱스→벡터 매핑 테이블의 행 개수(vocab_size와 동일), embedding_dim은 그 벡터의 차원(열 개수)입니다."},
+{q:"RNN Encoder-Decoder(Seq2Seq)에서 Encoder의 마지막 hidden state(h_n)의 역할은?", opts:["학습률을 조정한다", "입력 문장 전체의 정보를 압축한 context vector로, Decoder의 초기 입력이 된다", "토큰화 과정에만 사용된다", "항상 0으로 초기화된다"], a:1, e:"Encoder가 입력을 끝까지 읽고 나온 마지막 은닉상태(h_n)는 문장 전체 정보를 압축한 context vector로, 이를 Decoder에 전달해 출력을 생성하게 합니다."},
+{q:"LSTM이 RNN과 비교해 추가로 가지는 요소는?", opts:["Attention Score", "cell state(장기 기억을 담당하는 별도의 저장 공간)와 3개의 게이트", "Positional Encoding", "Batch Normalization"], a:1, e:"LSTM은 hidden state 외에 cell state를 따로 두고, Forget/Input/Output 게이트로 이 장기 기억을 관리해 RNN의 기울기 소실 문제를 완화합니다."},
+{q:"Luong Attention 계산 순서로 옳은 것은?", opts:["softmax → 내적 → 투영 → 가중합", "hidden state를 투영(Wa_ht) → 인코더 출력과 내적해 score 계산 → softmax로 확률화 → value(인코더 출력)를 가중합해 context vector 생성", "가중합 → 투영 → softmax", "임베딩 → 토큰화 → 내적"], a:1, e:"투영 → 내적(score) → softmax(확률화) → 가중합(context vector) 순서가 고정입니다. 이 순서는 뒤에 나오는 Self-Attention과도 동일한 원리입니다."},
+{q:"GPT-2의 Self-Attention에서 causal mask를 적용하는 이유는?", opts:["계산 속도를 높이기 위해", "현재 토큰이 아직 생성되지 않은 미래 토큰을 참조하지 못하게 막기 위해", "임베딩 차원을 줄이기 위해", "문장 부호를 제거하기 위해"], a:1, e:"GPT 같은 autoregressive 모델은 현재 위치가 자기 자신과 과거까지만 봐야 합니다. causal mask는 미래 위치의 attention score를 -무한대로 만들어 softmax 후 확률이 0이 되게 합니다."},
+{q:"LayerNorm이 정규화를 수행하는 기준(축)은?", opts:["배치(batch) 전체", "시퀀스 길이(time step) 전체", "각 시점(토큰)의 hidden dimension 내부", "vocab 전체"], a:2, e:"LayerNorm은 한 토큰의 hidden state(H차원) 안에서 평균과 표준편차를 계산해 정규화합니다. 배치 방향으로 정규화하는 BatchNorm과 대비됩니다."},
+{q:"Transformer Decoder Block(Pre-Norm)의 올바른 처리 순서는?", opts:["Self-Attention → LayerNorm → MLP", "LayerNorm → Self-Attention → Residual → LayerNorm → MLP → Residual", "MLP → Self-Attention → LayerNorm", "Residual → MLP → Self-Attention"], a:1, e:"입력을 먼저 정규화한 뒤 Self-Attention을 적용하고 원래 입력과 더해주고(Residual), 다시 정규화 후 MLP를 적용하고 또 더해주는 Pre-Norm 구조가 학습 안정성을 높입니다."},
+{q:"사전학습된 BERT 임베딩과 학습되지 않은 nn.Embedding을 시각화했을 때 나타나는 차이로 옳은 것은?", opts:["둘 다 완전히 무작위로 흩어져 있다", "사전학습된 임베딩은 의미가 비슷한 단어끼리 가깝게 뭉치지만, 미학습 임베딩은 그런 군집이 나타나지 않는다", "둘 다 동일한 결과를 보인다", "미학습 임베딩이 더 잘 뭉친다"], a:1, e:"잘 학습된 워드 임베딩은 age·adult·royalty 같은 그룹끼리 벡터 공간에서 가까이 모이지만, 학습되지 않은 임베딩은 무작위 초기화 상태라 그런 의미적 군집이 나타나지 않습니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>
