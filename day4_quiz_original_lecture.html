@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day4 강의 원본 내용 퀴즈</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>📊 Day4 강의 원본 내용 퀴즈</h1>
+<p class="subtitle">파운데이션 모델 · 지시학습/RLHF · 디코딩 알고리즘 · 프롬프트 엔지니어링 · LLM 평가와 한계 — 12문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [{"q": "파운데이션 모델을 기존 언어모델(BERT, GPT-1 등)과 결정적으로 다르게 만드는 특징은?", "opts": ["지도학습만으로 학습된다", "파라미터 수가 항상 더 적다", "Attention 메커니즘을 처음 사용했다", "추가 학습 없이 프롬프트만으로 새로운 작업을 수행할 수 있다"], "a": 3, "e": "GPT-1, BERT도 빅데이터·자기지도학습·Transformer라는 3요소를 갖췄지만, 각 태스크마다 별도의 파인튜닝이 필요했습니다. 파운데이션 모델은 규모가 커지면서 추가 학습 없이도 프롬프트만으로 새 작업을 수행하는 능력이 생겼다는 게 결정적 차이입니다."}, {"q": "규모의 법칙(Scaling Law)이 말하는 내용으로 가장 정확한 것은?", "opts": ["Compute, 데이터 크기, 파라미터 수가 늘어날수록 로그-로그 그래프에서 거의 일직선으로 성능이 예측 가능하게 좋아진다", "데이터가 많을수록 항상 과적합이 발생한다", "특정 규모를 넘으면 성능이 갑자기 나빠진다", "모델 크기와 성능은 무관하다"], "a": 0, "e": "Kaplan et al.(2020)의 연구에 따르면 Compute·Dataset Size·Parameters 세 축 모두에서 로그-로그 그래프 위에 거의 일직선 관계가 나타나, 더 크게 학습할수록 예측 가능한 수준으로 성능이 좋아집니다."}, {"q": "창발성(Emergent Property)의 대표적인 예로 강의자료가 든 것은?", "opts": ["과적합과 과소적합", "인-컨텍스트 학습과 추론(reasoning) 능력", "기울기 소실 문제", "다중공선성"], "a": 1, "e": "특정 규모를 넘어서면 그래디언트 업데이트 없이 프롬프트의 예시만으로 새로운 태스크를 수행하는 인-컨텍스트 학습, 그리고 추론 능력이 갑자기 나타나는 것이 창발성의 대표적인 예입니다."}, {"q": "InstructGPT의 3단계 학습 과정 순서로 올바른 것은?", "opts": ["지시 학습만으로 끝난다", "보상 모델 학습 → 강화학습 → 지시 학습", "지시 학습(SFT) → 보상 모델 학습 → PPO 강화학습으로 정책 업데이트", "강화학습 → 지시 학습 → 보상 모델 학습"], "a": 2, "e": "Step 1에서 사람이 작성한 시연 데이터로 정책을 지도학습(SFT)하고, Step 2에서 사람의 순위 데이터로 보상 모델을 학습하며, Step 3에서 그 보상 모델을 이용해 PPO 강화학습으로 정책을 업데이트합니다."}, {"q": "지시 학습(SFT)과 선호 학습(RLHF)의 근본적인 차이는?", "opts": ["SFT는 하나의 정답이 있다고 가정하지만, 선호 학습은 여러 응답 중 상대적으로 더 나은 응답을 학습한다", "SFT는 사람이 개입하지 않는다", "RLHF는 지도학습을 전혀 쓰지 않는다", "둘은 완전히 동일한 방법이다"], "a": 0, "e": "지시 학습은 주어진 입력에 적절한 하나의 응답이 있다고 가정하지만, 번역이나 창작처럼 정답이 여러 개일 수 있는 개방형 태스크에서는 한계가 있어, 여러 응답 중 더 선호되는 것을 학습하는 선호 학습(RLHF)이 필요합니다."}, {"q": "Beam Search가 Greedy Decoding과 다른 점은?", "opts": ["Beam Search는 항상 계산량이 더 적다", "Greedy Decoding이 더 다양한 응답을 생성한다", "둘은 동일한 알고리즘이다", "Beam Search는 매 시점 1개가 아니라 누적 확률이 높은 k개의 후보 문장을 동시에 고려한다"], "a": 3, "e": "Greedy Decoding은 매 시점 가장 확률 높은 토큰 하나만 선택하지만, Beam Search는 지금까지 생성된 문장 전체의 누적 확률을 기준으로 상위 k개의 후보를 유지하며 탐색해, 전체적으로 더 좋은 문장을 찾을 확률이 높습니다."}, {"q": "Temperature(T)가 1보다 클 때 디코딩에 미치는 영향은?", "opts": ["확률 분포가 더 완만해져 다양한 응답이 나오지만 품질이 불안정해질 수 있다", "확률분포 자체가 사라진다", "확률 분포가 더 뾰족해져 항상 같은 답만 나온다", "결과가 항상 결정적(deterministic)이 된다"], "a": 0, "e": "T>1이면 확률 분포가 더 완만(smooth)해져 다양한 토큰이 선택될 가능성이 높아지지만, 그만큼 품질이 불안정해질 수 있습니다. 반대로 T<1이면 분포가 뾰족해져 항상 비슷한 답만 나옵니다."}, {"q": "Top-K Sampling의 한계를 Top-P(Nucleus) Sampling이 어떻게 해결하나요?", "opts": ["확률이 낮은 토큰만 선택해서", "고정된 K개 대신 누적 확률 P를 기준으로 문맥에 따라 후보 개수를 자동으로 조절해서", "Beam Search와 동일한 방식으로 바꿔서", "K값을 항상 더 크게 고정해서"], "a": 1, "e": "Top-K는 문맥에 상관없이 K가 고정돼 있어 어떤 문맥에서는 너무 좁거나 넓게 후보를 잡을 수 있습니다. Top-P는 누적 확률이 P를 넘는 지점까지만 후보로 삼아, 문맥에 따라 후보 개수가 자동으로 늘고 줄어듭니다."}, {"q": "프롬프트 엔지니어링에서 '시스템 프롬프트'의 역할로 가장 적절한 것은?", "opts": ["모델의 파라미터를 직접 수정하는 명령", "디코딩 알고리즘을 바꾸는 설정", "사용자의 실제 질문 그 자체", "유저 쿼리와 무관하게 기본값으로 주어져 모델의 답변을 추가로 컨트롤하는 지침"], "a": 3, "e": "시스템 프롬프트는 대화 스타일·성격·제약 조건 등을 미리 정해주는 지침으로, 학습 이후에도 모델의 답변을 추가적으로 컨트롤하기 위해 사용됩니다. LLM 개인화나 페르소나 부여 등에 활용됩니다."}, {"q": "LLM-as-judge(G-Eval)의 3가지 대표적인 편향에 해당하지 않는 것은?", "opts": ["길이 편향", "위치 편향", "온도(temperature) 편향", "자기 선호 편향"], "a": 2, "e": "LLM-as-judge의 대표적인 한계는 특정 위치의 응답을 선호하는 위치 편향, 긴 응답을 선호하는 길이 편향, 평가 모델이 자신이 생성한 답변을 더 후하게 평가하는 자기 선호 편향입니다. '온도 편향'은 강의자료에서 다룬 개념이 아닙니다."}, {"q": "거대 언어 모델의 환각(Hallucination)을 완화하는 대표적인 방법으로 강의자료가 언급한 것은?", "opts": ["Temperature를 항상 2.0으로 높인다", "검색 증강 생성(RAG)으로 최신·정확한 외부 정보를 함께 제공한다", "모델 파라미터 수를 줄인다", "Greedy Decoding만 사용한다"], "a": 1, "e": "RAG(Retrieval-augmented Generation)는 외부의 최신·정확한 정보를 검색해 함께 제공함으로써, 모델이 사실과 다른 내용을 자신 있게 생성하는 환각 현상을 어느 정도 완화할 수 있습니다."}, {"q": "Self-Instruct 방식의 핵심 절차 순서로 옳은 것은?", "opts": ["필터링 → 분류 판별 → 지시 생성 → 인스턴스 생성", "필터링만 반복 수행", "지시 생성 → 분류 문제 판별 → 인스턴스(입출력) 생성 → 필터링", "인스턴스 생성 → 필터링 → 지시 생성 → 분류 판별"], "a": 2, "e": "Self-Instruct는 태스크 풀에서 시작해 LM이 새 지시를 생성하고, 분류 문제인지 판별한 뒤, 지시에 맞는 입출력 예시(인스턴스)를 생성하고, 마지막으로 노이즈·중복·저품질 데이터를 걸러내는 필터링 순서로 진행됩니다."}];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day4 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day4 학습 점검 문제</h1>
+<p class="subtitle">합성 데이터 생성 실습/과제 기반 점검 문제 — 10문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [{"q": "API 키를 코드에 직접 적지 않고 .env 파일과 환경변수로 관리하는 가장 큰 이유는?", "opts": ["API 호출 비용이 줄어들어서", "코드 실행 속도가 빨라져서", "코드를 공유하거나 GitHub에 올려도 키가 유출되지 않도록 하기 위해", "여러 모델을 동시에 쓸 수 있어서"], "a": 2, "e": "코드 안에 키를 직접 적으면 공유나 배포 과정에서 유출될 위험이 큽니다. .env 파일은 gitignore로 저장소에서 제외해, 코드와 민감 정보를 분리해서 관리할 수 있습니다."}, {"q": "Zero-shot, Few-shot, CoT 프롬프팅에 대한 설명으로 옳은 것은?", "opts": ["세 기법은 결과가 항상 동일하다", "CoT는 예시를 전혀 사용하지 않는 기법이다", "Zero-shot이 항상 가장 정확하다", "Few-shot은 예시를 통해 원하는 출력 형식이나 패턴을 유도한다"], "a": 3, "e": "Few-shot은 입출력 예시 몇 개를 프롬프트에 포함시켜 모델이 원하는 형식과 패턴을 따라 하도록 유도하는 기법입니다."}, {"q": "합성 데이터(Synthetic Data)를 만드는 목적으로 가장 거리가 먼 것은?", "opts": ["드문 엣지 케이스 데이터 생성", "실제 데이터보다 항상 완벽하게 정확한 데이터 확보", "데이터 부족 문제 해결", "개인정보 보호"], "a": 1, "e": "합성 데이터는 데이터 부족·비용·개인정보 문제를 완화하는 데 유용하지만, LLM이 생성한 데이터이므로 항상 완벽하게 정확하다고 보장할 수 없어 별도의 품질 평가가 필요합니다."}, {"q": "json_parsing 함수처럼 텍스트 지시로 JSON 출력을 받는 방식과 비교했을 때, response_format(JSON Schema)을 쓰는 이유는?", "opts": ["정해진 필드와 타입으로 출력을 API 차원에서 강제해 파싱 오류를 줄이기 위해", "더 긴 응답을 받기 위해", "temperature를 설정할 필요가 없어지기 때문에", "응답 속도가 항상 더 빠르기 때문에"], "a": 0, "e": "response_format으로 JSON Schema를 지정하면 모델이 그 스키마를 벗어난 형식으로 응답할 수 없어, 텍스트로만 형식을 지시할 때보다 파싱 오류가 크게 줄어듭니다."}, {"q": "합성 데이터 생성 시 temperature를 조절하는 이유로 가장 적절한 것은?", "opts": ["같은 프롬프트에서도 얼마나 다양한 응답이 나오게 할지 조절하기 위해", "API 요금을 절약하기 위해", "응답의 언어를 바꾸기 위해", "JSON 형식을 강제하기 위해"], "a": 0, "e": "temperature는 확률분포의 뾰족한 정도를 조절합니다. 값을 높이면 다양한 데이터가 생성되고, 낮추면 일관되고 안정적인 결과가 나옵니다."}, {"q": "LLM-as-judge로 데이터 품질을 평가할 때, 채점자 모델을 생성에 쓴 모델과 다르게(또는 더 크게) 설정하는 것이 권장되는 이유는?", "opts": ["같은 모델을 쓰면 자신의 답변을 더 호의적으로 평가하는 편향이 생길 수 있어서", "API 키를 아낄 수 있어서", "응답 속도가 빨라져서", "비용이 저렴해서"], "a": 0, "e": "같은 모델이 생성과 평가를 모두 맡으면 자기 스타일의 답변을 더 후하게 평가하는 자기 선호 편향이 생길 수 있어, 더 크거나 다른 모델을 평가자로 쓰는 것이 권장됩니다."}, {"q": "페르소나(Persona) 기반 데이터 증강의 핵심 아이디어로 옳은 것은?", "opts": ["데이터를 무작위로 삭제해 양을 줄인다", "같은 원본 의미를 화자의 어조·스타일을 바꿔가며 다양하게 표현한 데이터를 생성한다", "항상 한 가지 정답 형식만 생성한다", "원본 데이터를 그대로 복사한다"], "a": 1, "e": "페르소나 기반 증강은 동일한 원본 문장을 반말체, 비즈니스체, 존대체 등 다양한 어조로 재작성해, 적은 원본으로도 다양한 스타일의 학습 데이터를 확보하는 기법입니다."}, {"q": "데이터 증강 파이프라인에서 소규모(10개) → 중규모(100개) → 대규모(1000개+) 순으로 단계적으로 확장하는 이유는?", "opts": ["API가 한 번에 10개 이상 처리를 못해서", "무조건 순서를 지켜야 API가 작동해서", "적은 양으로 프롬프트와 코드를 먼저 검증한 뒤 비용을 최소화하며 규모를 늘리기 위해", "데이터가 많을수록 품질이 자동으로 나빠져서"], "a": 2, "e": "처음부터 대량으로 생성하면 프롬프트에 문제가 있을 때 비용과 시간 손실이 커집니다. 소규모로 먼저 검증하고 점진적으로 확장하는 것이 효율적입니다."}, {"q": "합성 데이터 평가 후 filtering_score 이상인 데이터만 남기는 과정의 목적은?", "opts": ["API 호출 횟수를 늘리기 위해", "페르소나 종류를 줄이기 위해", "데이터 양을 늘리기 위해", "품질이 낮게 평가된 데이터를 걸러내 최종 학습 데이터의 품질을 확보하기 위해"], "a": 3, "e": "LLM as Judge로 매긴 점수가 기준(filtering_score) 이상인 데이터만 남기면, 품질이 낮은 합성 데이터가 최종 학습 데이터셋에 섞이는 것을 막을 수 있습니다."}, {"q": "실습(영화 추천 합성 데이터)과 과제(Text-to-SQL 번역 데이터 증강)의 공통된 파이프라인 순서로 옳은 것은?", "opts": ["필터링 → 프롬프팅 → 생성", "프롬프팅 기법 비교 → 구조화된 데이터 생성 → LLM-as-judge로 품질 평가", "평가 → 생성 → 프롬프팅 기법 선택", "순서는 매번 다르며 정해진 흐름이 없다"], "a": 1, "e": "두 노트북 모두 프롬프팅 기법을 비교해보고, 구조화된 형식으로 데이터를 생성한 뒤, LLM을 평가자로 활용해 품질을 검증하는 동일한 흐름을 따릅니다."}];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>

@@ -1,25 +1,72 @@
-<div style="padding:1rem 0">
-<h2 class="sr-only">Day1 학습 점검 문제 10개, 선택하면 바로 채점됩니다</h2>
-<div id="progress" style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;"></div>
-<div style="height:4px;background:var(--surface-1);border-radius:4px;margin-bottom:1.25rem;overflow:hidden;">
-  <div id="bar" style="height:100%;background:var(--fill-accent, #378ADD);width:0%;transition:width .2s;"></div>
-</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day1 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day1 학습 점검 문제</h1>
+<p class="subtitle">EDA · 지도학습 분류 모델 실습/과제 기반 점검 문제 — 10문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
 <div id="qbox"></div>
-<div id="result" style="display:none;text-align:center;padding:2rem 0;"></div>
-</div>
+<div id="result"></div>
+
 <script>
-const Q = [
-{q:"AI, ML, DL의 관계를 가장 올바르게 설명한 것은?", opts:["DL은 AI의 상위 개념이다","ML은 AI의 하위 분야로, 데이터로부터 규칙을 학습한다","AI는 반드시 ML을 사용해야만 구현된다","DL은 ML과 무관한 독립적인 분야이다"], a:1, e:"ML은 AI의 하위 분야로 규칙을 사람이 직접 코딩하지 않고 데이터에서 스스로 학습합니다. AI는 휴리스틱·최적화 알고리즘처럼 ML 없이도 구현될 수 있으므로 3번은 틀렸고, DL은 ML의 하위 분야입니다."},
-{q:"다음 중 회귀(Regression) 문제에 해당하지 않는 것은?", opts:["집값 예측","온도 예측","이메일 스팸 여부 분류","매출액 예측"], a:2, e:"스팸 여부는 범주(카테고리)를 예측하는 분류 문제입니다. 나머지는 모두 연속값을 예측하는 회귀 문제입니다."},
-{q:"질병 유무 분류에서 실제 환자가 1%, 건강한 사람이 99%일 때, 모든 샘플을 '건강'으로만 예측해도 정확도(Accuracy)는 약 99%가 나옵니다. 이때 이 문제를 더 잘 드러내는 지표는?", opts:["MSE","R²","Recall(재현율)","결정계수"], a:2, e:"실제 환자(양성)를 전부 놓치게 되어 Recall(진짜 양성 중 잡아낸 비율)이 0이 되며, 이를 통해 정확도만으로는 보이지 않던 문제를 발견할 수 있습니다. MSE·R²는 회귀 지표입니다."},
-{q:"훈련 데이터에서는 오류가 매우 작지만, 테스트 데이터에서는 오류가 큰 현상을 무엇이라고 부르나요?", opts:["과소적합(Underfitting)","과적합(Overfitting)","일반화(Generalization)","정규화(Regularization)"], a:1, e:"훈련 데이터의 잡음까지 외워버려서 훈련은 잘하지만 테스트는 못하는 현상이 과적합입니다. 반대로 둘 다 오류가 크면 과소적합입니다."},
-{q:"K-겹 교차검증(K-fold Cross-Validation)에 대한 설명으로 올바른 것은?", opts:["데이터를 단 한 번만 훈련/검증으로 나눈다","K개 그룹 중 하나만 계속 검증셋으로 사용한다","각 그룹이 돌아가며 검증셋이 되고, 결과를 평균낸다","K값이 클수록 계산량이 줄어든다"], a:2, e:"K개 그룹을 돌아가며 한 번씩 검증셋으로 쓰고 나머지로 훈련하여, K개 결과를 평균냅니다. K가 클수록(극단적으로 LOOCV) 연산량은 오히려 늘어납니다."},
-{q:"회귀 모델의 평가 지표 중 '이상치에 덜 민감하며 평균적인 오차 크기'를 나타내는 것은?", opts:["MSE","RMSE","MAE","R²"], a:2, e:"MAE(평균절대오차)는 오차를 제곱하지 않고 절대값으로 다루므로 극단값(이상치)의 영향을 덜 받습니다. MSE/RMSE는 제곱하기 때문에 큰 오차에 더 민감합니다."},
-{q:"StandardScaler를 사용할 때, 올바른 절차는?", opts:["전체 데이터에 fit한 뒤 train/test로 분할한다","train에만 fit하고, train과 test 모두 그 기준으로 transform한다","test에만 fit하고 train을 변환한다","train과 test를 각각 따로 fit한다"], a:1, e:"데이터 누수 방지를 위해 표준화의 기준(평균·분산)은 반드시 train에서만 계산(fit)하고, test는 그 기준으로 변환(transform)만 해야 합니다. 전체 데이터로 fit하면 데이터 누수가 발생합니다."},
-{q:"비지도학습의 예시로 가장 적절한 것은?", opts:["이메일 스팸/정상 분류","집값 예측","라벨 없는 데이터에서 구매 성향별 고객 묶기","이진 분류 모델 학습"], a:2, e:"라벨(정답) 없이 데이터의 구조·패턴을 찾는 것이 비지도학습입니다. 나머지는 모두 정답(라벨)이 있는 지도학습 예시입니다."},
-{q:"K-means와 계층적 군집(Hierarchical Clustering)의 차이점으로 올바른 것은?", opts:["K-means는 클러스터 개수를 미리 정하지 않아도 된다","계층적 군집은 덴드로그램을 만들고, K-means는 K를 미리 정해야 한다","둘 다 대규모 데이터에서 계산량이 동일하다","K-means는 지도학습 알고리즘이다"], a:1, e:"K-means는 클러스터 개수(K)를 미리 정해야 하는 반면, 계층적 군집은 K를 미리 정하지 않고 덴드로그램을 만들어 원하는 높이에서 자릅니다. 계산량은 계층적 군집이 더 많고, K-means는 비지도학습입니다."},
-{q:"보스턴 주택가격 과제에서 '훈련 데이터에서만 IQR 경계를 계산해 test에도 동일하게 적용한다'는 원칙이 지키려는 개념은?", opts:["과적합 방지","데이터 누수(Data Leakage) 방지","차원 축소","교차검증"], a:1, e:"test 데이터의 정보가 전처리 단계에 섞여들어가지 않도록(=데이터 누수 방지), 모든 통계량은 train에서만 계산해야 합니다. 이는 과적합 방지와는 별개의 개념입니다."}
-];
+const Q = [{"q": "AI, ML, DL의 관계를 가장 올바르게 설명한 것은?", "opts": ["DL은 AI의 상위 개념이다", "DL은 ML과 무관한 독립적인 분야이다", "ML은 AI의 하위 분야로, 데이터로부터 규칙을 학습한다", "AI는 반드시 ML을 사용해야만 구현된다"], "a": 2, "e": "ML은 AI의 하위 분야로 규칙을 사람이 직접 코딩하지 않고 데이터에서 스스로 학습합니다. AI는 휴리스틱·최적화 알고리즘처럼 ML 없이도 구현될 수 있으므로 3번은 틀렸고, DL은 ML의 하위 분야입니다."}, {"q": "다음 중 회귀(Regression) 문제에 해당하지 않는 것은?", "opts": ["이메일 스팸 여부 분류", "온도 예측", "매출액 예측", "집값 예측"], "a": 0, "e": "스팸 여부는 범주(카테고리)를 예측하는 분류 문제입니다. 나머지는 모두 연속값을 예측하는 회귀 문제입니다."}, {"q": "질병 유무 분류에서 실제 환자가 1%, 건강한 사람이 99%일 때, 모든 샘플을 '건강'으로만 예측해도 정확도(Accuracy)는 약 99%가 나옵니다. 이때 이 문제를 더 잘 드러내는 지표는?", "opts": ["Recall(재현율)", "R²", "결정계수", "MSE"], "a": 0, "e": "실제 환자(양성)를 전부 놓치게 되어 Recall(진짜 양성 중 잡아낸 비율)이 0이 되며, 이를 통해 정확도만으로는 보이지 않던 문제를 발견할 수 있습니다. MSE·R²는 회귀 지표입니다."}, {"q": "훈련 데이터에서는 오류가 매우 작지만, 테스트 데이터에서는 오류가 큰 현상을 무엇이라고 부르나요?", "opts": ["일반화(Generalization)", "과적합(Overfitting)", "과소적합(Underfitting)", "정규화(Regularization)"], "a": 1, "e": "훈련 데이터의 잡음까지 외워버려서 훈련은 잘하지만 테스트는 못하는 현상이 과적합입니다. 반대로 둘 다 오류가 크면 과소적합입니다."}, {"q": "K-겹 교차검증(K-fold Cross-Validation)에 대한 설명으로 올바른 것은?", "opts": ["K값이 클수록 계산량이 줄어든다", "데이터를 단 한 번만 훈련/검증으로 나눈다", "각 그룹이 돌아가며 검증셋이 되고, 결과를 평균낸다", "K개 그룹 중 하나만 계속 검증셋으로 사용한다"], "a": 2, "e": "K개 그룹을 돌아가며 한 번씩 검증셋으로 쓰고 나머지로 훈련하여, K개 결과를 평균냅니다. K가 클수록(극단적으로 LOOCV) 연산량은 오히려 늘어납니다."}, {"q": "회귀 모델의 평가 지표 중 '이상치에 덜 민감하며 평균적인 오차 크기'를 나타내는 것은?", "opts": ["MAE", "MSE", "RMSE", "R²"], "a": 0, "e": "MAE(평균절대오차)는 오차를 제곱하지 않고 절대값으로 다루므로 극단값(이상치)의 영향을 덜 받습니다. MSE/RMSE는 제곱하기 때문에 큰 오차에 더 민감합니다."}, {"q": "StandardScaler를 사용할 때, 올바른 절차는?", "opts": ["전체 데이터에 fit한 뒤 train/test로 분할한다", "train에만 fit하고, train과 test 모두 그 기준으로 transform한다", "train과 test를 각각 따로 fit한다", "test에만 fit하고 train을 변환한다"], "a": 1, "e": "데이터 누수 방지를 위해 표준화의 기준(평균·분산)은 반드시 train에서만 계산(fit)하고, test는 그 기준으로 변환(transform)만 해야 합니다. 전체 데이터로 fit하면 데이터 누수가 발생합니다."}, {"q": "비지도학습의 예시로 가장 적절한 것은?", "opts": ["집값 예측", "이메일 스팸/정상 분류", "이진 분류 모델 학습", "라벨 없는 데이터에서 구매 성향별 고객 묶기"], "a": 3, "e": "라벨(정답) 없이 데이터의 구조·패턴을 찾는 것이 비지도학습입니다. 나머지는 모두 정답(라벨)이 있는 지도학습 예시입니다."}, {"q": "K-means와 계층적 군집(Hierarchical Clustering)의 차이점으로 올바른 것은?", "opts": ["둘 다 대규모 데이터에서 계산량이 동일하다", "K-means는 클러스터 개수를 미리 정하지 않아도 된다", "K-means는 지도학습 알고리즘이다", "계층적 군집은 덴드로그램을 만들고, K-means는 K를 미리 정해야 한다"], "a": 3, "e": "K-means는 클러스터 개수(K)를 미리 정해야 하는 반면, 계층적 군집은 K를 미리 정하지 않고 덴드로그램을 만들어 원하는 높이에서 자릅니다. 계산량은 계층적 군집이 더 많고, K-means는 비지도학습입니다."}, {"q": "보스턴 주택가격 과제에서 '훈련 데이터에서만 IQR 경계를 계산해 test에도 동일하게 적용한다'는 원칙이 지키려는 개념은?", "opts": ["과적합 방지", "데이터 누수(Data Leakage) 방지", "차원 축소", "교차검증"], "a": 1, "e": "test 데이터의 정보가 전처리 단계에 섞여들어가지 않도록(=데이터 누수 방지), 모든 통계량은 train에서만 계산해야 합니다. 이는 과적합 방지와는 별개의 개념입니다."}];
 let idx=0, score=0, answered=false;
 const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
 function render(){
@@ -28,13 +75,13 @@ function render(){
   prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
   bar.style.width = Math.round((idx/Q.length)*100)+'%';
   let optsHtml = item.opts.map((o,i)=>
-    '<button class="opt" data-i="'+i+'" style="display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;font-size:14px;line-height:1.5;">'+(i+1)+') '+o+'</button>'
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
   ).join('');
   qbox.innerHTML =
-    '<p style="font-size:15px;font-weight:500;margin:0 0 1rem;">'+item.q+'</p>'+
+    '<p class="question">'+item.q+'</p>'+
     optsHtml+
-    '<div id="fb" style="display:none;margin-top:12px;padding:12px 14px;border-radius:var(--radius);font-size:13px;line-height:1.6;"></div>'+
-    '<button id="next" style="display:none;margin-top:12px;width:100%;">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
   qbox.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       if(answered) return;
@@ -44,14 +91,14 @@ function render(){
       if(correct) score++;
       qbox.querySelectorAll('.opt').forEach(b=>{
         const i=parseInt(b.getAttribute('data-i'));
-        if(i===item.a){ b.style.borderColor='var(--border-success, #639922)'; b.style.background='var(--bg-success, #EAF3DE)'; b.style.color='var(--text-success, #27500A)'; }
-        else if(i===chosen){ b.style.borderColor='var(--border-danger, #E24B4A)'; b.style.background='var(--bg-danger, #FCEBEB)'; b.style.color='var(--text-danger, #791F1F)'; }
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
         b.disabled=true;
       });
       const fb=document.getElementById('fb');
       fb.style.display='block';
-      fb.style.background = correct ? 'var(--bg-success, #EAF3DE)' : 'var(--bg-danger, #FCEBEB)';
-      fb.style.color = correct ? 'var(--text-success, #27500A)' : 'var(--text-danger, #791F1F)';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
       fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
       document.getElementById('next').style.display='block';
       prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
@@ -66,15 +113,21 @@ function showResult(){
   bar.style.width='100%';
   qbox.style.display='none';
   prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
   resultBox.style.display='block';
   const pct=Math.round((score/Q.length)*100);
   resultBox.innerHTML =
-    '<p style="font-size:24px;font-weight:500;margin:0 0 4px;">'+score+' / '+Q.length+'</p>'+
-    '<p style="font-size:14px;color:var(--text-secondary);margin:0 0 1.5rem;">정답률 '+pct+'%</p>'+
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
     '<button id="retry">다시 풀기</button>';
   document.getElementById('retry').addEventListener('click', ()=>{
-    idx=0; score=0; resultBox.style.display='none'; qbox.style.display='block'; prog.style.display='block'; render();
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
   });
 }
 render();
 </script>
+</body>
+</html>
