@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day2 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 {
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  #progress {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  #bar-outer {
+    height: 6px;
+    background: var(--surface);
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  #bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width .25s;
+  }
+  .question {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 1.1rem;
+    line-height: 1.5;
+  }
+  button.opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 15px;
+    margin-bottom: 9px;
+    font-size: 14.5px;
+    line-height: 1.5;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    cursor: pointer;
+    transition: all .15s;
+    color: #222;
+  }
+  button.opt:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+  button.opt:disabled { cursor: default; }
+  #fb {
+    display: none;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  #next {
+    display: none;
+    margin-top: 14px;
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day2 학습 점검 문제</h1>
+<p class="subtitle">PyTorch MLP·Perceptron 실습/과제 기반 점검 문제 — 10문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [
+{q:"requires_grad=True로 설정한 텐서에 대해 설명으로 올바른 것은?", opts:["GPU로만 이동할 수 있다", "해당 텐서에 수행되는 연산이 추적되어 백워드 시 기울기를 계산할 수 있다", "값이 자동으로 정규화된다", "자동으로 float형으로 변환된다"], a:1, e:"requires_grad=True는 해당 텐서에 대한 모든 연산을 추적해 연산 그래프를 만들고, .backward() 호출 시 그 그래프를 따라 역전파해 기울기를 계산합니다. GPU 이동은 .to()가 별도로 담당합니다."},
+{q:"파라미터를 직접 업데이트할 때 torch.no_grad()를 사용하는 이유는?", opts:["업데이트 속도를 느리게 하기 위해", "업데이트 연산이 새로운 연산 그래프에 추가되지 않게 하기 위해", "기울기를 자동으로 누적하기 위해", "GPU 메모리를 확장하기 위해"], a:1, e:"requires_grad=True인 텐서에 inplace 연산(-= 등)을 하면 그래프가 꺼져 에러가 나거나 의도치 않은 그래프가 생깁니다. no_grad() 안에서는 연산이 추적되지 않아 안전하게 업데이트할 수 있습니다."},
+{q:"model.train()과 model.eval()의 차이로 올바른 것은?", opts:["파라미터 값을 저장하고 불러오는 차이다", "train()은 GPU, eval()은 CPU를 사용한다", "Dropout·BatchNorm 같은 레이어의 동작 방식이 바뀐다", "학습률이 자동으로 변경된다"], a:2, e:"train()/eval()은 파라미터가 아니라 레이어 동작 방식을 바꿉니다. Dropout은 학습 중에만 일부 뉴런을 0으로 만들고, BatchNorm은 학습 중에는 현재 배치 통계를, 평가 중에는 누적된 통계를 사용합니다."},
+{q:"DataLoader에서 훈련 데이터에는 shuffle=True, 검증/테스트 데이터에는 shuffle=False를 쓰는 이유는?", opts:["검증 속도를 높이기 위해서", "훈련은 순서 의존성을 줄여 일반화를 돕고, 검증/테스트는 결과 재현성을 위해서", "shuffle은 모델 성능과 무관하기 때문에", "GPU 메모리 절약을 위해서"], a:1, e:"훈련 데이터를 매번 셔플하면 모델이 데이터 순서를 외우는 것을 방지해 일반화 성능이 좋아집니다. 검증/테스트는 순서가 결과에 영향을 주지 않아 고려할 필요가 없습니다."},
+{q:"nn.Module을 상속해 새 모델 클래스를 만들 때 __init__에서 반드시 호출해야 하는 것은?", opts:["self.forward()", "super().__init__()", "torch.no_grad()", "model.eval()"], a:1, e:"super().__init__()을 호출해야 nn.Module이 내부적으로 파라미터 관리, 훅(hook) 등을 제대로 준비합니다. 이것을 생략하면 레이어가 제대로 등록되지 않습니다."},
+{q:"훈련 루프에서 optimizer.zero_grad()를 수행하지 않으면 어떤 문제가 생기는가?", opts:["학습이 더 빨라진다", "기울기가 이전 배치의 값과 누적되어 잘못된 방향으로 업데이트된다", "모델이 초기화된다", "GPU 메모리가 부족해진다"], a:1, e:"PyTorch의 기울기는 기본적으로 덮어쓰지 않고 누적됩니다. zero_grad()를 호출하지 않으면 이전 배치의 기울기가 현재 배치 기울기에 더해져 잘못된 방향으로 업데이트됩니다."},
+{q:"CrossEntropyLoss가 내부적으로 포함하는 연산은?", opts:["ReLU + MSE", "Sigmoid + MAE", "Softmax + 음의 로그 우도(NLL)", "Dropout + BatchNorm"], a:2, e:"CrossEntropyLoss는 로짓(logits)에 Softmax를 적용해 확률로 바꿔 음의 로그 우도(NLL)를 계산합니다. 따로 Softmax를 적용할 필요가 없습니다."},
+{q:"학습 곡선에서 과적합의 신호로 가장 적절한 것은?", opts:["Train Loss와 Valid Loss가 함께 감소한다", "Train Loss는 감소하지만 Valid Loss가 다시 증가한다", "둘 다 감소하지 않는다", "Accuracy가 같이 증가한다"], a:1, e:"훈련 데이터에만 계속 맞춰가면서(train loss 감소) 새로운 데이터에서는 오히려 성능이 떨어지는(valid loss 증가) 것이 과적합의 대표적인 신호입니다."},
+{q:"Dataset과 DataLoader의 차이로 올바른 것은?", opts:["둘 다 인덱싱이 가능하다", "Dataset은 단일 인덱싱이 가능하지만 DataLoader는 이터러블로만 접근 가능하다", "DataLoader가 데이터를 저장하고 Dataset이 배치를 만든다", "둘은 동일한 개념이다"], a:1, e:"Dataset은 단일건 정의라 인덱싱(dataset[0])이 가능하지만, DataLoader는 배치 처리용이라 인덱싱이 불가능하고 이터러블로만 꺼낼 수 있습니다."},
+{q:"결정 경계(decision boundary) 시각화가 가장 유용한 경우는?", opts:["파라미터 개수를 세기 위해", "2차원 입력 데이터에서 모델이 공간을 어떻게 나누었는지 직관적으로 보기 위해", "계산 속도를 측정하기 위해", "데이터 개수를 세기 위해"], a:1, e:"입력이 2차원일 때 결정 경계를 그리면 모델이 실제로 어떤 기준으로 클래스를 나누었는지를 한눈에 확인할 수 있어, 단순 수치 지표보다 직관적인 해석이 가능합니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>

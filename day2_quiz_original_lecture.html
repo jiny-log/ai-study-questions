@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day2 강의 원본 내용 퀴즈</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 {
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  #progress {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  #bar-outer {
+    height: 6px;
+    background: var(--surface);
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  #bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width .25s;
+  }
+  .question {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 1.1rem;
+    line-height: 1.5;
+  }
+  button.opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 15px;
+    margin-bottom: 9px;
+    font-size: 14.5px;
+    line-height: 1.5;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    cursor: pointer;
+    transition: all .15s;
+    color: #222;
+  }
+  button.opt:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+  button.opt:disabled { cursor: default; }
+  #fb {
+    display: none;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  #next {
+    display: none;
+    margin-top: 14px;
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>📊 Day2 강의 원본 내용 퀴즈</h1>
+<p class="subtitle">선형회귀 · 로지스틱회귀 · 신경망 구조 · 신경망 적합(경사하강법·역전파) — 12문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [
+{q:"단순선형회귀에서 '최소제곱법'이 최소화하는 대상은?", opts:["잔차의 절댓값 합", "잔차제곱합(RSS)", "결정계수 R²", "학습률"], a:1, e:"최소제곱법은 각 데이터와 직선 사이 수직 거리(잔차)를 제곱해서 모두 더한 RSS(Residual Sum of Squares)가 가장 작아지는 직선을 찾는 방법입니다."},
+{q:"다중선형회귀에서 '다중공선성(Multicollinearity)'이 문제가 되는 이유는?", opts:["계산 속도가 느려지기 때문에", "입력 변수끼리 서로 강하게 상관되어 각 계수의 추정이 불안정해지기 때문에", "R²가 항상 낮아지기 때문에", "표본 크기가 줄어들기 때문에"], a:1, e:"키와 몸무게처럼 두 입력 변수가 서로 닮아있으면, 모델이 '어느 변수 때문에 결과가 바뀐 건지' 구분하기 어려워져 계수의 분산이 커지고 해석이 불안정해집니다."},
+{q:"선형회귀를 분류 문제(확률 예측)에 그대로 쓰기 어려운 이유는?", opts:["계산량이 너무 많아서", "예측값이 0~1 범위로 제한되지 않아서", "R²를 계산할 수 없어서", "다중공선성이 항상 발생해서"], a:1, e:"선형회귀의 예측값은 특정 범위로 제한되지 않아 0보다 작거나 1보다 큰 값이 나올 수 있습니다. 확률은 반드시 0~1 사이여야 하므로 그대로 쓰기 부적절합니다."},
+{q:"로지스틱 회귀에서 '오즈(Odds)'의 정의로 올바른 것은?", opts:["성공확률과 실패확률의 차이", "성공확률을 실패확률로 나눈 값", "성공확률의 로그값", "성공확률과 실패확률의 곱"], a:1, e:"오즈는 p(y=1|x)/p(y=0|x), 즉 성공확률이 실패확률에 비해 몇 배 더 높은지를 나타내는 값입니다. 여기에 로그를 취하면 로짓(logit)이 됩니다."},
+{q:"로지스틱 회귀의 계수(β)는 어떤 방법으로 추정하나요?", opts:["최소제곱법(RSS 최소화)", "최대우도추정(MLE, 우도를 최대화)", "K-겹 교차검증", "표준화"], a:1, e:"로지스틱 회귀는 '지금 관찰한 데이터가 나올 확률(우도)이 가장 높아지는' 파라미터를 찾는 최대우도추정(MLE)으로 계수를 구합니다. 계산 편의를 위해 log-likelihood를 최대화합니다."},
+{q:"Shallow 신경망(은닉층 1개)에서 활성화함수 ReLU의 역할은?", opts:["입력을 0~1로 정규화한다", "입력이 0보다 작으면 0, 0 이상이면 그대로 통과시켜 비선형성을 만든다", "손실을 자동으로 최소화한다", "가중치를 무작위로 초기화한다"], a:1, e:"ReLU(a[z]=0 if z<0, a[z]=z if z≥0)는 대표적인 활성화함수로, 선형 변환들 사이에 비선형성을 넣어줘서 신경망이 직선 하나가 아니라 '꺾인 선분들을 조합한' 복잡한 함수를 표현할 수 있게 해줍니다."},
+{q:"'보편적 근사 정리(Universal Approximation Theorem)'가 말하는 내용은?", opts:["Deep 네트워크만 임의의 함수를 근사할 수 있다", "Hidden unit이 충분히 많으면 은닉층 1개짜리 얕은 신경망도 임의의 연속함수를 원하는 정밀도로 근사할 수 있다", "학습률이 클수록 더 정확한 근사가 가능하다", "손실함수는 항상 Convex여야 근사가 가능하다"], a:1, e:"보편적 근사 정리는 Hidden unit 개수를 충분히 늘리면 은닉층이 1개뿐인 Shallow 네트워크로도 임의의 연속함수를 원하는 정밀도로 근사할 수 있다는 이론입니다."},
+{q:"Deep 네트워크가 같은 hidden unit 수의 Shallow 네트워크보다 표현력이 강한 이유로 강의자료가 든 비유는?", opts:["종이접기(여러 번 접을수록 조각이 조밀해짐)", "레고 블록 쌓기", "퍼즐 맞추기", "지도 그리기"], a:0, e:"층을 쌓을수록 조각별 선형 함수가 여러 번 접히는 효과가 생겨(종이접기에 비유), 같은 수의 hidden unit이라도 Shallow보다 훨씬 많은 선형 구간(표현력)을 만들 수 있습니다."},
+{q:"경사하강법의 파라미터 업데이트 식 φ ← φ - α·∂L/∂φ 에서 α는 무엇인가요?", opts:["손실함수 값", "학습률(learning rate), 한 스텝에서 이동하는 크기를 결정", "기울기의 절댓값", "은닉유닛의 개수"], a:1, e:"α(학습률)는 기울기의 반대 방향으로 얼마나 크게 이동할지를 결정하는 값입니다. 너무 크면 발산하고 너무 작으면 학습이 느려집니다."},
+{q:"Convex 문제와 Non-convex 문제의 차이로 올바른 것은?", opts:["Convex는 지역 최솟값이 여러 개, Non-convex는 전역 최솟값이 유일하다", "Convex는 전역 최솟값이 유일해 최적화가 쉽고, Non-convex는 여러 지역 최솟값·안장점이 있어 최적화가 어렵다", "둘 다 항상 동일한 난이도를 갖는다", "Non-convex는 항상 선형모델에서만 나타난다"], a:1, e:"Convex(볼록) 문제는 전역 최솟값이 유일해서 어디서 출발하든 그 지점에 도달할 수 있지만, Non-convex 문제는 여러 개의 지역 최솟값이나 안장점이 있어 시작점에 따라 다른 곳에 갇힐 수 있습니다."},
+{q:"확률적 경사하강법(SGD)이 일반 경사하강법과 다른 점은?", opts:["전체 데이터 대신 무작위로 뽑은 미니배치로 기울기를 계산한다", "손실함수를 아예 사용하지 않는다", "항상 Convex 문제에서만 쓸 수 있다", "학습률을 사용하지 않는다"], a:0, e:"SGD는 매 스텝마다 전체 데이터를 다 쓰는 대신 무작위로 뽑은 미니배치만으로 기울기를 계산해 업데이트합니다. 계산 비용이 줄고 지역 최솟값을 피하기 쉬워지지만, 경로가 지그재그로 움직이는 특징이 있습니다."},
+{q:"역전파(Backpropagation)의 핵심 아이디어를 가장 잘 설명한 것은?", opts:["모든 파라미터를 무작위로 재설정한다", "출력의 오차를 기준으로 그래프를 거꾸로 따라가며 연쇄법칙으로 각 층 파라미터의 기울기를 계산한다", "입력층에서 출력층 방향으로만 기울기를 계산한다", "손실함수 없이 파라미터를 업데이트한다"], a:1, e:"역전파는 출력층에서 입력층 방향으로(거꾸로) 연쇄법칙을 반복 적용해, 이미 구해둔 다음 층의 기울기를 이용해 이전 층의 기울기를 순차적으로 계산해 나가는 절차입니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>
