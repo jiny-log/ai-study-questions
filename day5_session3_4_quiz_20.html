@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day5 3~4차시 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day5 3~4차시 학습 점검 문제</h1>
+<p class="subtitle">다양한 신경망 모델(RNN·LSTM·Attention·ViT) + 이미지 모델 학습 전략 — 20문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [
+{"q": "CNN 구조의 장점으로 가장 거리가 먼 것은?", "opts": ["지역적인 특징 학습에 특화되어 작은 필터로 패턴을 잘 포착한다", "파라미터 효율성이 뛰어나 이미지 블록별 가중치를 공유해 연산량을 줄인다", "Pooling과 Stride 연산으로 인해 위치 변화와 노이즈에도 견고하다", "텍스트나 음성과 같은 순차적 데이터의 순서 정보를 효과적으로 반영한다"], "a": 3, "e": "CNN은 이미지 처리에 최적화된 구조로 지역적 특징 학습과 파라미터 효율성, 노이즈에 대한 견고함 등의 장점을 가지지만, 텍스트나 음성처럼 순차적 데이터의 시간·순서 의존성을 반영하는 데는 한계가 있습니다. 이런 데이터는 주로 RNN이나 Transformer 계열 모델이 더 적합합니다."},
+{"q": "다음 중 RNN의 특징으로 옳지 않은 것은?", "opts": ["은닉 상태(hidden state)를 통해 이전 시점의 정보를 다음 시점으로 전달한다", "순차적 데이터를 처리하는 데 적합하다", "입력 데이터의 시계열 의존성을 반영할 수 있다", "병렬 연산이 쉬워 대규모 데이터 처리에서 속도가 빠르다"], "a": 3, "e": "RNN은 입력 데이터를 순차적으로 처리해야 하므로 병렬 연산이 어렵고, 대규모 데이터 학습 시 속도가 느려지는 단점이 있습니다. 이 문제는 Transformer 계열 모델이 등장하며 크게 개선되었습니다."},
+{"q": "RNN의 대표적인 한계로 옳은 것을 모두 고르면?", "opts": ["기울기 소실과 기울기 폭발", "과적합과 병렬화 어려움", "데이터 순서 반영 불가와 파라미터 과다", "수용영역 부족과 정보 희석"], "a": 0, "e": "RNN은 시간 역전파(BPTT) 시 동일 가중치가 반복 곱해지면서 기울기 소실/폭발 문제가 자주 발생합니다. 이 두 가지가 RNN의 대표적인 한계이자 장거리 의존성 학습을 어렵게 만드는 원인입니다."},
+{"q": "LSTM이 단순 RNN과 비교해 기울기를 더 오래 보존할 수 있는 핵심 이유는?", "opts": ["가중치를 항상 1보다 작게 유지하기 때문에", "셀 상태(Cell state)를 통해 기울기가 곱셈이 아닌 덧셈 형태로도 전달되기 때문에", "활성화 함수를 전혀 사용하지 않기 때문에", "입력 데이터를 순서와 무관하게 처리하기 때문에"], "a": 1, "e": "LSTM은 셀 상태(Cell state)라는 모듈을 도입해, 기울기가 선형가중치의 곱 이외에 덧셈 형태로도 전달될 수 있게 합니다. 덧셈 경로는 곱셈 경로보다 기울기를 훨씬 안정적으로 오래 보존할 수 있습니다."},
+{"q": "어텐션 메커니즘에서 쿼리(Query)와 키(Key)의 역할을 가장 잘 설명한 것은?", "opts": ["쿼리는 질의의 대상이고, 키는 비교할 특성으로 둘의 유사도가 어텐션 가중치가 된다", "쿼리와 키는 항상 동일한 값을 가져야 한다", "쿼리는 출력값이고, 키는 입력값이다", "키는 학습되지 않는 고정된 상수이다"], "a": 0, "e": "쿼리(Q)는 질의의 대상, 키(K)는 비교할 특성을 나타내며, 쿼리와 키의 유사도(softmax(q·k/√D))가 어텐션 가중치가 되어 값(V)에 곱해집니다. 쿼리와 키가 유사할수록 해당 값에 더 높은 가중치가 부여됩니다."},
+{"q": "셀프 어텐션(Self-Attention)과 교차 어텐션(Cross-Attention)의 차이로 가장 적절한 것은?", "opts": ["셀프 어텐션은 하나의 입력 안에서, 교차 어텐션은 둘 이상의 이종 데이터 간에 쿼리/키/값을 정의한다", "셀프 어텐션은 이미지에만, 교차 어텐션은 텍스트에만 사용된다", "두 방식은 완전히 동일한 연산이다", "교차 어텐션은 학습 파라미터가 없다"], "a": 0, "e": "셀프 어텐션은 하나의 입력 안에서 패치(토큰) 정보로 쿼리/키/값을 정의해 같은 데이터 내 유사도를 반영합니다. 교차 어텐션은 둘 이상의 서로 다른(이종) 데이터에서 쿼리/키/값을 정의해 이종 데이터 간의 관계를 학습합니다."},
+{"q": "CNN, RNN, LSTM, Attention 네 모델의 특성을 비교한 설명으로 옳은 것은?", "opts": ["CNN은 지역적 특성에 집중하고 장거리 맥락 이해가 떨어지며, Attention은 장거리 맥락에 탁월하고 정보 희석이 없다", "RNN은 데이터 순서를 전혀 반영하지 못한다", "LSTM은 장거리 맥락을 전혀 이해하지 못한다", "CNN이 네 모델 중 장거리 의존성 학습에 가장 뛰어나다"], "a": 0, "e": "CNN은 지역적(작은 범위) 특성에 집중해 장거리 맥락 이해가 떨어지고 데이터 순서 반영이 불가능합니다. RNN은 순서를 반영하지만 장거리 맥락 학습이 어렵고, LSTM은 순서와 장거리 맥락을 어느 정도 이해하지만 정보 희석 문제가 남아있습니다. Attention은 장거리 맥락에 탁월하고 정보 희석이 없다는 장점이 있습니다."},
+{"q": "Vision Transformer(ViT)의 특징에 대한 설명으로 옳지 않은 것은?", "opts": ["패치를 나눈 후 위치 인코딩을 통해 순서(위치) 정보를 추가한다", "인코더는 정규화, 다중헤드 어텐션, 연결층(MLP)으로 반복적으로 구성된다", "CNN과 달리 수용영역을 넓히지 않아도 전역 맥락을 학습할 수 있다", "데이터가 작을 때도 CNN보다 항상 높은 성능을 보장한다"], "a": 3, "e": "ViT는 대규모 학습 데이터가 있을 때 강력한 성능을 발휘하지만, 데이터가 적은 경우에는 오히려 CNN(ResNet)보다 성능이 떨어질 수 있습니다. 따라서 \"항상 높은 성능을 보장한다\"는 설명은 잘못입니다."},
+{"q": "ViT가 일반 크기의 ImageNet만으로 학습했을 때 ResNet보다 성능이 낮게 나오는 경향이 있는 이유로 가장 적절한 것은?", "opts": ["ViT는 CNN과 달리 이미지의 공간적 구조를 가정하는 귀납 편향이 적어, 그 구조를 데이터로부터 직접 배워야 하기 때문에", "ViT는 합성곱 연산을 전혀 사용할 수 없기 때문에", "ViT는 패치 크기를 항상 1픽셀로 고정하기 때문에", "ResNet은 어텐션을 함께 사용하기 때문에"], "a": 0, "e": "CNN은 지역적 특징 학습이라는 귀납 편향이 구조에 내장되어 있어 적은 데이터로도 잘 학습되지만, ViT는 그런 가정이 적어 이미지의 구조적 특성을 데이터로부터 직접 배워야 합니다. 그래서 데이터가 충분히 많아야(ImageNet-21K, JFT-300M 등) CNN 수준 이상의 성능을 낼 수 있습니다."},
+{"q": "지식 증류(Knowledge Distillation, DeiT)를 ViT 학습에 활용하는 방식으로 가장 적절한 것은?", "opts": ["학생 ViT 모델이 선생님 CNN 모델의 예측(확률 분포)까지 함께 따라가도록 학습시켜 데이터 효율을 높인다", "선생님 모델과 학생 모델이 서로 다른 데이터셋을 사용해야 한다", "증류학습은 반드시 정답 레이블 없이 진행해야 한다", "증류학습은 ViT의 파라미터 수를 늘리기 위한 기법이다"], "a": 0, "e": "지식 증류는 먼저 선생님 CNN 모델을 이미지-레이블로 학습시킨 뒤, 학생 ViT 모델이 정답 레이블뿐 아니라 선생님 모델의 예측 확률 분포까지 따라가도록(크로스 엔트로피 손실 + KL 발산 손실) 학습시키는 방식입니다. 이를 통해 ViT-B/16의 ImageNet 정확도가 78%에서 83.6%까지 크게 향상되었습니다."},
+{"q": "좋은 모델 구조를 골랐는데도 학습이 실패할 수 있는 가장 적절한 이유는?", "opts": ["학습률, 초기화, 정규화 같은 훈련 전략이 잘못되면 성능이 떨어질 수 있기 때문", "모델 구조가 좋으면 어떤 전략을 써도 항상 성능이 보장되기 때문", "데이터 양이 많으면 훈련 전략은 전혀 중요하지 않기 때문", "활성화 함수는 학습 성패에 영향을 주지 않기 때문"], "a": 0, "e": "구조가 아무리 좋아도 학습률, 초기화, 정규화 같은 훈련 전략이 잘못되면 성능이 떨어질 수 있습니다. 좋은 구조는 필요 조건일 뿐 충분 조건이 아닙니다."},
+{"q": "Sigmoid 함수의 주요 문제점으로 가장 적절한 것은?", "opts": ["항상 음수 값만 출력한다", "출력이 0이나 1에 가까워지면 기울기가 0에 가까워져 역전파가 잘 안 된다", "연산량이 ReLU보다 항상 적다", "입력값의 부호를 바꿔 버린다"], "a": 1, "e": "Sigmoid는 출력이 0이나 1 근처로 포화되면 기울기가 0에 가까워져, 역전파 과정에서 기울기가 거의 전달되지 않는 문제가 있습니다."},
+{"q": "모든 가중치(W)와 편향(b)을 0으로 초기화하면 어떤 일이 생기는가?", "opts": ["학습 속도가 오히려 빨라진다", "모든 뉴런의 출력과 기울기가 동일해져 학습이 이뤄지지 않는다", "기울기가 폭발적으로 커진다", "모델이 곧바로 최적 성능에 도달한다"], "a": 1, "e": "가중치와 편향을 모두 0으로 초기화하면 모든 뉴런의 출력과 기울기가 동일해져서, 뉴런들이 서로 다른 특징을 학습할 방법이 없어 학습이 이뤄지지 않습니다."},
+{"q": "자비에(Xavier) 초기화와 허(He) 초기화의 차이를 가장 잘 설명한 것은?", "opts": ["Xavier는 표준편차를 입력 차원에 맞추고, He는 ReLU에 맞춰 분산을 2배로 더 크게 잡는다", "두 방법은 완전히 동일한 공식을 사용한다", "Xavier는 항상 He보다 더 큰 표준편차를 사용한다", "He 초기화는 tanh 활성화 함수 전용으로 설계되었다"], "a": 0, "e": "Xavier 초기화는 표준편차를 1/√(입력 차원)로, He 초기화는 ReLU가 절반의 값을 0으로 만드는 특성을 고려해 표준편차를 √(2/입력 차원)로 설정합니다."},
+{"q": "L1 정규화(Lasso)가 L2 정규화(Ridge)와 다른 점으로 가장 적절한 것은?", "opts": ["L1은 중요하지 않은 가중치를 완전히 0으로 만들어 희소한 모델을 만든다", "L1은 가중치를 제곱해서 패널티를 부여한다", "L1은 항상 L2보다 연산량이 많다", "L1은 드롭아웃과 동일한 방식으로 동작한다"], "a": 0, "e": "L1 정규화는 가중치의 절댓값 크기만큼 동일하게 패널티를 부여해, 중요하지 않은 가중치를 완전히 0으로 만드는 희소한(sparse) 모델을 만듭니다. L2는 가중치를 제곱한 값에 패널티를 부여해 모든 가중치를 골고루 작게 만듭니다."},
+{"q": "드롭아웃(Dropout)을 그대로 테스트 단계에 적용하면 성능이 저하되는 이유는?", "opts": ["테스트 데이터가 항상 더 어렵기 때문", "학습 시엔 뉴런 일부가 꺼져 출력이 줄어들지만, 테스트 시엔 뉴런을 전부 사용해 학습-추론 간 분포 차이가 생기기 때문", "드롭아웃은 학습 속도만 늦출 뿐 출력에는 영향이 없기 때문", "테스트 시에는 가중치가 모두 0이 되기 때문"], "a": 1, "e": "학습 중에는 일부 뉴런이 꺼져 실질적인 출력값이 줄어들지만, 테스트 시에는 뉴런을 전부 사용하기 때문에 그대로 두면 학습 때보다 출력 크기가 커져 성능이 저하됩니다. 이를 해결하기 위해 Inverted Dropout처럼 학습 시 출력을 미리 스케일링하는 방법을 씁니다."},
+{"q": "학습률을 계단식(Step Decay)으로 줄이는 방식의 단점으로 가장 적절한 것은?", "opts": ["연산량이 항상 가장 많이 든다", "변경 지점을 여러 개 선정해야 해서 복잡하고 학습 곡선이 불안정할 수 있다", "학습률이 절대 줄어들지 않는다", "이미지 데이터에는 적용할 수 없다"], "a": 1, "e": "계단식 방식은 몇 에폭마다 학습률을 줄일지 여러 지점을 정해야 하므로 복잡하고, 학습률이 급격히 바뀌는 지점에서 손실 곡선이 불안정해질 수 있습니다."},
+{"q": "학습률을 선정하는 기본적인 전략으로 가장 적절한 것은?", "opts": ["처음부터 끝까지 항상 같은 학습률을 유지한다", "학습률을 큰 값에서 시작해 에폭이 지날수록 점점 작은 값으로 조정한다", "학습률은 무작위로 매 스텝마다 바꾸는 것이 가장 좋다", "학습률은 가중치 초기화와는 전혀 무관하게 정한다"], "a": 1, "e": "기본 전략은 학습 초반에는 큰 학습률로 손실 함수 표면의 넓은 영역을 빠르게 탐색하고, 이후 안정적인 수렴을 위해 학습률을 점점 줄이는 것입니다."},
+{"q": "하이퍼파라미터를 탐색하는 그리드 탐색과 랜덤 탐색의 차이로 가장 적절한 것은?", "opts": ["그리드 탐색은 후보들을 격자처럼 전부 조합하고, 랜덤 탐색은 공간에서 무작위로 값을 선택해 탐색한다", "그리드 탐색은 무작위로 값을 선택하고, 랜덤 탐색은 격자처럼 전부 조합한다", "두 방식은 완전히 동일한 결과를 낸다", "랜덤 탐색은 항상 그리드 탐색보다 느리다"], "a": 0, "e": "그리드 탐색은 후보 값들을 격자처럼 모든 조합으로 실험하는 방식이고, 랜덤 탐색은 하이퍼파라미터 공간에서 무작위로 값을 선택해 탐색하는 방식입니다. 랜덤 탐색은 성능에 영향이 적은 축의 값에 불필요한 실험 횟수를 쓰지 않을 수 있어 더 효율적일 때가 많습니다."},
+{"q": "디버깅 체크리스트에서, 초기 손실값을 확인하는 목적으로 가장 적절한 것은?", "opts": ["학습 속도를 미리 측정하기 위해", "분류 문제에서 CE 손실이라면 초기 손실이 log(클래스 개수)와 비슷한 수준인지 확인해 데이터 로딩/라벨 문제를 조기에 발견하기 위해", "최종 정확도를 미리 예측하기 위해", "드롭아웃 비율을 결정하기 위해"], "a": 1, "e": "분류 문제에서 CE 손실을 쓴다면, 모델이 아무것도 학습하지 않은 초기 상태의 손실은 log(클래스 개수)와 비슷한 수준이어야 정상입니다. 이 값에서 크게 벗어난다면 데이터 로딩이나 라벨 문제를 의심해봐야 합니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>
