@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day5 학습 점검 문제</title>
+<style>
+  :root {
+    --accent: #378ADD;
+    --success-bg: #EAF3DE;
+    --success-text: #27500A;
+    --success-border: #639922;
+    --danger-bg: #FCEBEB;
+    --danger-text: #791F1F;
+    --danger-border: #E24B4A;
+    --surface: #F4F4F4;
+    --text-secondary: #6B6B6B;
+    --border: #E0E0E0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    color: #222;
+    background: #fff;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  #bar-outer { height: 6px; background: var(--surface); border-radius: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  #bar { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .question { font-size: 16px; font-weight: 600; margin: 0 0 1.1rem; line-height: 1.5; }
+  button.opt {
+    display: block; width: 100%; text-align: left; padding: 13px 15px; margin-bottom: 9px;
+    font-size: 14.5px; line-height: 1.5; border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: #fff; cursor: pointer; transition: all .15s; color: #222;
+  }
+  button.opt:hover:not(:disabled) { border-color: var(--accent); }
+  button.opt:disabled { cursor: default; }
+  #fb { display: none; margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.65; }
+  #next {
+    display: none; margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius); background: var(--accent); color: #fff; cursor: pointer;
+  }
+  #next:hover { opacity: 0.9; }
+  #result { display: none; text-align: center; padding: 3rem 0; }
+  #result .score { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  #result .pct { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  #retry {
+    padding: 12px 28px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>✅ Day5 학습 점검 문제</h1>
+<p class="subtitle">CNN 이미지 모델(합성곱·풀링·모델 변천사) 기반 점검 문제 — 10문항</p>
+
+<div id="progress"></div>
+<div id="bar-outer"><div id="bar"></div></div>
+<div id="qbox"></div>
+<div id="result"></div>
+
+<script>
+const Q = [
+{"q": "CNN의 합성곱 레이어가 FCN(완전연결층)과 비교해 갖는 핵심 특징은?", "opts": ["입력의 3차원 구조(높이/너비/채널)를 그대로 보존하며 필터로 연산한다", "입력을 1차원 벡터로 펼쳐서 완전연결층으로 연산한다", "모든 뉴런이 입력 전체와 빠짐없이 연결된다", "채널 수와 무관하게 항상 동일한 필터를 사용한다"], "a": 0, "e": "FCN은 이미지를 1차원 벡터로 펼쳐서(Flatten) 연산하지만, CNN의 합성곱 레이어는 입력의 높이·너비·채널로 이루어진 3차원 구조를 그대로 유지한 채 필터를 이동시키며 특징 맵을 뽑아냅니다."},
+{"q": "32x32 크기의 입력에 5x5 필터를 스트라이드 1, 패딩 0으로 합성곱하면 출력의 가로/세로 크기는?", "opts": ["32", "28", "27", "16"], "a": 1, "e": "출력 해상도 공식은 (입력 크기 − 필터 크기)/스트라이드 + 1 입니다. (32 − 5)/1 + 1 = 28이 됩니다."},
+{"q": "풀링(Pooling)에 대한 설명으로 옳지 않은 것은?", "opts": ["맥스풀링은 정해진 영역에서 가장 큰 값을 선택한다", "풀링은 입력이 약간 이동하거나 노이즈가 있어도 특징을 유지하는 데 도움이 된다", "풀링 레이어는 학습해야 할 파라미터(가중치)를 가진다", "풀링은 특징 맵의 크기를 줄여 이후 연산량을 감소시킨다"], "a": 2, "e": "풀링은 맥스풀링/평균풀링처럼 정해진 규칙으로 값을 뽑는 비학습적 연산이라 학습 가능한 파라미터가 없습니다. 나머지 설명은 모두 풀링의 실제 효과입니다."},
+{"q": "수용영역(Receptive Field)에 대한 설명으로 가장 적절한 것은?", "opts": ["항상 필터 크기와 정확히 같다", "레이어가 깊어질수록 오히려 작아진다", "입력 이미지 크기와 무관하게 항상 고정된 값이다", "레이어가 깊어질수록 하나의 출력 뉴런이 참조하는 입력 영역이 넓어진다"], "a": 3, "e": "합성곱 레이어를 여러 겹 쌓을수록, 뒤쪽 레이어의 뉴런 하나가 간접적으로 참조하는 원본 입력의 영역(수용영역)은 점점 넓어져 더 넓은 맥락을 이해할 수 있게 됩니다."},
+{"q": "스트라이드 합성곱(Strided Convolution)이 풀링과 비교해 갖는 특징은?", "opts": ["필터(커널)를 학습하면서 동시에 특징 맵의 해상도를 줄일 수 있다", "학습 가능한 파라미터가 전혀 없다", "항상 풀링보다 출력 해상도가 크다", "채널 수를 줄이는 용도로만 사용된다"], "a": 0, "e": "풀링은 학습 상수가 없는 비학습적 연산이지만, 스트라이드 합성곱은 필터를 여러 칸씩 이동시키면서 학습 가능한 커널로 동시에 해상도를 줄일 수 있어 정보 손실을 줄이는 장점이 있습니다."},
+{"q": "AlexNet의 Conv1 레이어는 입력 227x227x3에 11x11 필터 96개, 스트라이드 4, 패딩 0을 적용합니다. 출력의 가로/세로 크기는?", "opts": ["96", "55", "227", "11"], "a": 1, "e": "(227 − 11)/4 + 1 = 55 입니다. 출력 채널 수는 필터 개수와 같은 96이 되어, 최종 출력은 96x55x55가 됩니다."},
+{"q": "VGGNet이 5x5나 7x7 대신 3x3의 작은 필터를 여러 번 쌓는 설계를 택한 이유로 가장 적절한 것은?", "opts": ["연산량이 항상 더 많아지기 때문에", "파라미터 수가 항상 더 늘어나기 때문에", "동일한 수용영역을 확보하면서도 파라미터·연산량을 줄일 수 있기 때문에", "풀링을 아예 사용하지 않기 위해"], "a": 2, "e": "3x3 합성곱 두 개를 연달아 쌓으면 5x5 합성곱 한 개와 동일한 수용영역을 확보하면서도, 파라미터는 18C² vs 25C², 연산량은 18C²HW vs 25C²HW로 더 적게 듭니다."},
+{"q": "ResNet의 잔차 블록(Residual Block)에서 \"F(x) + x\" 구조가 갖는 의미로 가장 적절한 것은?", "opts": ["입력 x를 항상 무시하고 F(x)만 사용한다", "학습이 잘 되면 출력이 항상 0이 된다", "얕은 레이어의 성능이 깊은 레이어보다 항상 더 좋다", "학습이 잘 안 되어 F(x)가 0에 가까워지더라도 입력 x가 그대로 전달되어 최소한의 성능이 보장된다"], "a": 3, "e": "변환 경로 F(x)와 별개로 입력 x를 그대로 전달하는 shortcut 경로가 있어, 최악의 경우 F(x)≈0이 되어도 출력이 입력과 같아지므로 깊게 쌓아도 성능이 최소한 보장됩니다. 이것이 ResNet이 56-layer 같은 매우 깊은 네트워크도 안정적으로 학습할 수 있게 한 핵심 아이디어입니다."},
+{"q": "MobileNet의 깊이별 분리 합성곱(Depthwise Separable Convolution, 깊이별+화소별 합성곱)의 주된 목적은?", "opts": ["일반 합성곱과 비슷한 성능을 유지하면서 연산량과 파라미터 수를 크게 줄이기 위해", "필터 크기를 항상 1x1로만 고정하기 위해", "채널 수를 항상 두 배로 늘리기 위해", "풀링 연산을 완전히 대체하기 위해"], "a": 0, "e": "채널별로 따로 3x3 합성곱을 적용하는 깊이별 합성곱과, 그 결과를 1x1 합성곱으로 채널 간에 섞는 화소별 합성곱을 나누어 적용하면, 하나의 3x3 일반 합성곱보다 연산량을 크게(채널 수가 커질수록 최대 약 9배) 줄일 수 있어 모바일·엣지 환경에 적합합니다."},
+{"q": "CNN 기반 이미지 모델의 등장 순서로 옳은 것은?", "opts": ["VGG → AlexNet → ResNet → MobileNet", "AlexNet → VGG → ResNet → MobileNet", "ResNet → AlexNet → VGG → MobileNet", "MobileNet → ResNet → VGG → AlexNet"], "a": 1, "e": "AlexNet(2012, 딥러닝 CNN의 본격적인 시작) → VGG(2014, 작은 3x3 필터를 깊게 쌓는 구조) → ResNet(2015, 잔차 연결로 기울기 소실 문제 해결) → MobileNet(2017, 모바일 환경 최적화) 순서로 등장했습니다."}
+];
+let idx=0, score=0, answered=false;
+const qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), prog=document.getElementById('progress'), resultBox=document.getElementById('result');
+function render(){
+  answered=false;
+  const item=Q[idx];
+  prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+  bar.style.width = Math.round((idx/Q.length)*100)+'%';
+  let optsHtml = item.opts.map((o,i)=>
+    '<button class="opt" data-i="'+i+'">'+(i+1)+') '+o+'</button>'
+  ).join('');
+  qbox.innerHTML =
+    '<p class="question">'+item.q+'</p>'+
+    optsHtml+
+    '<div id="fb"></div>'+
+    '<button id="next">'+(idx===Q.length-1?'결과 보기':'다음 문제')+'</button>';
+  qbox.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered=true;
+      const chosen=parseInt(btn.getAttribute('data-i'));
+      const correct = chosen===item.a;
+      if(correct) score++;
+      qbox.querySelectorAll('.opt').forEach(b=>{
+        const i=parseInt(b.getAttribute('data-i'));
+        if(i===item.a){ b.style.borderColor='var(--success-border)'; b.style.background='var(--success-bg)'; b.style.color='var(--success-text)'; }
+        else if(i===chosen){ b.style.borderColor='var(--danger-border)'; b.style.background='var(--danger-bg)'; b.style.color='var(--danger-text)'; }
+        b.disabled=true;
+      });
+      const fb=document.getElementById('fb');
+      fb.style.display='block';
+      fb.style.background = correct ? 'var(--success-bg)' : 'var(--danger-bg)';
+      fb.style.color = correct ? 'var(--success-text)' : 'var(--danger-text)';
+      fb.textContent = (correct ? '정답이에요. ' : '아쉬워요, 정답은 '+(item.a+1)+'번이에요. ') + item.e;
+      document.getElementById('next').style.display='block';
+      prog.textContent = (idx+1)+' / '+Q.length+'   맞은 개수: '+score;
+    });
+  });
+  document.getElementById('next').addEventListener('click', ()=>{
+    idx++;
+    if(idx>=Q.length){ showResult(); } else { render(); }
+  });
+}
+function showResult(){
+  bar.style.width='100%';
+  qbox.style.display='none';
+  prog.style.display='none';
+  document.getElementById('bar-outer').style.display='none';
+  resultBox.style.display='block';
+  const pct=Math.round((score/Q.length)*100);
+  resultBox.innerHTML =
+    '<p class="score">'+score+' / '+Q.length+'</p>'+
+    '<p class="pct">정답률 '+pct+'%</p>'+
+    '<button id="retry">다시 풀기</button>';
+  document.getElementById('retry').addEventListener('click', ()=>{
+    idx=0; score=0;
+    resultBox.style.display='none';
+    document.getElementById('bar-outer').style.display='block';
+    qbox.style.display='block'; prog.style.display='block'; render();
+  });
+}
+render();
+</script>
+</body>
+</html>
